@@ -1,3 +1,18 @@
 script
   include socket.js
-h1 despacito
+  include ../node_modules/ramda/dist/ramda.min.js
+
+style
+  include app.css
+    
+#templates
+  .row.template
+    span |0|
+    audio(src='|1|')
+  
+#table
+  
+script 
+  include app.js
+
+  

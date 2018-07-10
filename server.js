@@ -76,4 +76,6 @@ wss
 
     const on = (message, f) =>
       ws.events[message] = concat(defaultTo([pp], ws.events[message]), [f])
+
+    emit('files', transcription2mp3)
   })
