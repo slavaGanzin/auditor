@@ -14,8 +14,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "async": "^2.6.1",
     "auto-require": "github:viktor-ku/auto-require",
     "express": "^4.16.3",
+    "fs-readdir-recursive": "^1.1.0",
     "morgan": "^1.9.0",
     "pug": "^2.0.3",
     "ramda": "^0.25.0",
