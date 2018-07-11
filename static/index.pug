@@ -2,7 +2,7 @@ script
   include ../node_modules/ramda/dist/ramda.min.js
   include ../node_modules/mousetrap/mousetrap.min.js
 
-link(rel="stylesheet" type="text/css" href='app.css')
+link(rel="stylesheet" type="text/css" href='index.css')
     
 #templates
   .card.fadeIn
@@ -14,5 +14,6 @@ link(rel="stylesheet" type="text/css" href='app.css')
   
 #card
   
+script(src='global.js')
 script(src='socket.js')
-script(src='app.js')
+script(src='index.js')

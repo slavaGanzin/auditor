@@ -1,36 +1,16 @@
-for (let k in R) {
-  window[k] = R[k]
-}
-delete R
-
-const $ = document.querySelectorAll.bind(document)
-const I = document.getElementById.bind(document)
-const T = template => obj =>
-  compose(...values(mapObjIndexed((v, k) => replace(`|${k}|`, String(v)), obj)))(template)
-
-map(template => {
-  T[template.classList[0]] = T(template.outerHTML)
-  template.parentNode.removeChild(template)
-}, I('templates').children)
-
 let fileIndex = 0
 
-function blurAll(){
-  const tmp = document.createElement("input")
-  document.body.appendChild(tmp)
-  tmp.focus()
-  document.body.removeChild(tmp)
-}
-const redrawFiles = () => {
+const redrawCard = () => {
   I('card').innerHTML = T.card(FILES[fileIndex])
   Mousetrap(I('text')).bind('escape', e => {
     blurAll()
   })
+  I('audio').addEventListener('progress',()=>$('.buttons'),false)
 }
 
 const nextFile = (k = 1) => {
   fileIndex = clamp(0, length(FILES), fileIndex + k)
-  redrawFiles()
+  redrawCard()
 }
 
 const grade = quality => {
@@ -40,7 +20,15 @@ const grade = quality => {
   nextFile()
 }
 
-ws.on('files', compose(redrawFiles, files => window.FILES = files))
+const record = () => {
+  navigator.mediaDevices.getUserMedia({
+    audio: true
+  }).then(stream => {
+    const recorder = new MediaRecorder(stream)
+  })
+}
+
+ws.on('files', compose(redrawCard, files => window.FILES = files))
 
 Mousetrap
   .bind('tab', e => {
