@@ -13,7 +13,7 @@ map(template => {
   template.parentNode.removeChild(template)
 }, I('templates').children)
 
-let fileIndex = 200
+let fileIndex = 0
 
 function blurAll(){
   const tmp = document.createElement("input")
@@ -30,7 +30,6 @@ const redrawFiles = () => {
 
 const nextFile = (k = 1) => {
   fileIndex = clamp(0, length(FILES), fileIndex + k)
-  console.log(fileIndex)
   redrawFiles()
 }
 
