@@ -13,8 +13,7 @@
   transform: translate(-50%, -50%);
 }
 #card #text,
-#card audio,
-#card .buttons {
+#card audio {
   padding: 20px;
 }
 #card audio {
