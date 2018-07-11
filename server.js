@@ -1,9 +1,8 @@
 #!/usr/bin/env node-dev
 
 const fs = require('fs')
-const {exec} = require('child_process')
+const {spawn} = require('child_process')
 
-exec('pug --watch static --name-after-file --pretty --no-debug')
 
 require('auto-require')({
   globaly: true,
@@ -12,13 +11,13 @@ require('auto-require')({
 const NEW = 'data/new/'
 const FILES = 'data/files.csv'
 
-let transcription2mp3 = []
+let files = []
 const readFiles = () => {
-  transcription2mp3 = map(split(',\t'), split('\n', fs.readFileSync(FILES, 'utf8')))
+  files = map(split(',\t'), split('\n', fs.readFileSync(FILES, 'utf8')))
 }
 readFiles()
 
-const files = map(x => `${NEW}${x}`, fsReaddirRecursive(NEW))
+const newFiles = map(x => `${NEW}${x}`, fsReaddirRecursive(NEW))
 
 const outCsv = fs.createWriteStream(FILES, {'flags': 'a'})
 const processFile = (file, cb) => {
@@ -36,14 +35,14 @@ const processFile = (file, cb) => {
 }
 const mp3queue = async.queue(processFile, 10)
 mp3queue.drain = readFiles
-map(mp3queue.push, reject(test(/mp3$|txt$/), files))
+map(mp3queue.push, reject(test(/mp3$|txt$/), newFiles))
 
 const app = express()
 app.use(morgan('combined'))
 app.use('/data', serveStatic('data', {cacheControl: false}))
 app.use(serveStatic('static', {cacheControl: false}))
 app.get('/files', (req, res, next) => {
-  res.json(transcription2mp3)
+  res.json(files)
 })
 
 app.listen(3000)
@@ -77,5 +76,5 @@ wss
     const on = (message, f) =>
       ws.events[message] = concat(defaultTo([pp], ws.events[message]), [f])
 
-    emit('files', transcription2mp3)
+    emit('files', files)
   })

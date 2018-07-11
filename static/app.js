@@ -3,18 +3,48 @@ for (let k in R) {
 }
 delete R
 
-const $ = document.getElementsByClassName.bind(document)
+const $ = document.querySelectorAll.bind(document)
 const I = document.getElementById.bind(document)
 const T = template => obj =>
   compose(...values(mapObjIndexed((v, k) => replace(`|${k}|`, String(v)), obj)))(template)
 
 map(template => {
-  template.classList.remove('template')
-  const k = template.classList[0]
-  T[k] = T(template.outerHTML)
+  T[template.classList[0]] = T(template.outerHTML)
+  template.parentNode.removeChild(template)
 }, I('templates').children)
 
-const redrawFiles = () =>
-  I('table').innerHTML = join('\n', (map(T.row, FILES.slice(0,10))))
+let fileIndex = 200
 
+function blurAll(){
+ var tmp = document.createElement("input");
+ document.body.appendChild(tmp);
+ tmp.focus();
+ document.body.removeChild(tmp);
+}
+const redrawFiles = () => {
+  I('card').innerHTML = T.card(FILES[fileIndex])
+  Mousetrap(I('text')).bind('escape', e => {
+    blurAll()
+  })
+
+}
+
+const rate = n =>
+  alert(n)
 ws.on('files', compose(redrawFiles, files => window.FILES = files))
+
+Mousetrap
+  .bind('tab', e => {
+    e.preventDefault()
+    I('text').focus()
+  })
+  .bind('space', () => I('audio').paused ? I('audio').play() : I('audio').pause())
+  .bind('left',  () => I('audio').currentTime = clamp(0, I('audio').duration,  I('audio').currentTime - 5))
+  .bind('right', () => I('audio').currentTime = clamp(0, I('audio').duration-1,  I('audio').currentTime + 5))
+  .bind('up', compose(redrawFiles, () => fileIndex = clamp(0, length(FILES), fileIndex - 1)))
+  .bind('down', compose(redrawFiles, () => ++fileIndex))
+  .bind('1', () => rate(1))
+  .bind('2', () => rate(2))
+  .bind('3', () => rate(3))
+  .bind('4', () => rate(4))
+  .bind('5', () => rate(5))
