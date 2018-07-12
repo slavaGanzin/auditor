@@ -82,16 +82,12 @@ wss
 
     E.on('update:audio', () => emit('update:audio', {}))
 
-    on('grade', ({text, quality, audio}) => {
-      const validatedAudio = audio.replace('new', 'validated')
+    on('grade', ({text, quality, audio, validated}) => {
+      mkdirp(path.dirname(validated))
+      fs.copyFile(audio, validated, e => fs.unlink(audio, identity))
 
-      mkdirp(path.dirname(validatedAudio))
-      fs.copyFile(audio, validatedAudio, e => fs.unlink(audio, identity))
-
-      validatedCsv.write(`"${text.replace('"', "'")}",${validatedAudio.replace('data/validated/', '')},${quality}\n`)
+      validatedCsv.write(`"${text.replace('"', "'")}",${validated},${quality}\n`)
     })
-
-
   })
 
 const binaryServer = binaryjs.BinaryServer({port: 9001})
