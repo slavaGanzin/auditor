@@ -5,7 +5,10 @@ const redrawCard = () => {
   Mousetrap(I('text')).bind('escape', e => {
     blurAll()
   })
-  I('audio').addEventListener('progress',()=>$('.buttons'),false)
+  I('grade').style.opacity = 0
+  I('audio').addEventListener('progress',
+    x => I('grade').style.opacity = 1
+  )
 }
 
 const nextFile = (k = 1) => {
@@ -13,22 +16,34 @@ const nextFile = (k = 1) => {
   redrawCard()
 }
 
+const getFileParams = () => ({
+  text: I("text").innerText,
+  audio: FILES[fileIndex][1]
+})
+
 const grade = quality => {
-  const text = I("text").innerText
-  const audio = FILES[fileIndex][1]
-  ws.emit('grade', {text, quality, audio})
+  const grade = getFileParams()
+  grade.quality = quality
+  ws.emit('grade', grade)
   nextFile()
 }
 
 const record = () => {
-  navigator.mediaDevices.getUserMedia({
-    audio: true
-  }).then(stream => {
-    const recorder = new MediaRecorder(stream)
-  })
+  if(window.recording) {
+    $('#record .button')[0].classList.remove('recording')
+    return window.stopRecording()
+  }
+
+  ws.emit('record:start', getFileParams())
+  $('#record .button')[0] .classList.add('recording')
+  window.startRecording()
 }
 
 ws.on('files', compose(redrawCard, files => window.FILES = files))
+
+ws.on('update:audio', () =>
+  I('audio').src = 'data/recorder.mp3?' + Math.random()
+)
 
 Mousetrap
   .bind('tab', e => {
@@ -45,3 +60,4 @@ Mousetrap
   .bind('3', () => grade(3))
   .bind('4', () => grade(4))
   .bind('5', () => grade(5))
+  .bind('r', record)

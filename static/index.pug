@@ -8,12 +8,16 @@ link(rel="stylesheet" type="text/css" href='index.css')
   .card.fadeIn
     #text(contenteditable='true') |0|
     audio#audio(controls autoplay loop src="|1|")
-    .buttons
+    #grade
       each n, color in {'red':1, 'orange': 2, 'grey': 3, 'MediumSeaGreen': 4, 'green': 5}
-        button(onclick=`grade(${n})` style=`background-color:${color}`)= n
+        .button(onclick=`grade(${n})` style=`background-color:${color}`)= n
+    #record
+      .button(onclick='record()') ◉
   
 #card
   
+script(src='binary.min.js')
 script(src='global.js')
 script(src='socket.js')
 script(src='index.js')
+script(src='recorder.js')

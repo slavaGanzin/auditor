@@ -1,27 +1,57 @@
+body
+  display: flex
+
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes fadeOut { from { opacity:1; } to { opacity:0; } }
+
+fadeIn(duration = .3s, display = none, animation=fadeIn)
+  animation: animation ease-out 1
+  animation-fill-mode:forwards
+  animation-duration: duration
+  will-change: opacity
+  opacity: 0
+  display: display
+
+fadeOut(duration = .3s, display = none)
+  fadeIn(duration, display, animation=fadeOut)
+
+.recording
+  animation: fadeIn 1s infinite alternate
+
 #templates
   display: none
 
-
 #card
-  font-family: sans-serif;
-  font-size: 24px;
-  width: 50%;
-  padding: 30px;
-  text-align: center;
-  top: 50%;
-  left: 50%;
-  position: relative;
-  transform: translate(-50%, -50%);
+  font-family: sans-serif
+  font-size: 24px
+  width: 50%
+  padding: 30px
+  text-align: center
+  margin: auto;
 
   #text, audio
     padding: 20px
 
   audio
+    padding-left: 0
+    padding-right: 0
     width: 100%
 
+.button
+  color: white
+  width: 70
+  height: 70
+  font-size: 50px
+  line-height: 70px
+  cursor: pointer
 
-.buttons
-  button
-    width: 70;
-    height: 70;
-    font-size: 50px;
+#record
+  .button
+    margin: auto;
+    color: red
+    width: 100%
+
+#grade
+  margin-bottom: 10px
+  display: flex
+  justify-content: space-around;

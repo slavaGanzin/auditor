@@ -17,6 +17,7 @@
   "dependencies": {
     "async": "^2.6.1",
     "auto-require": "github:viktor-ku/auto-require",
+    "binaryjs": "^0.2.1",
     "express": "^4.16.3",
     "fs-readdir-recursive": "^1.1.0",
     "mkdirp": "^0.5.1",
@@ -25,7 +26,8 @@
     "pug-cli": "^1.0.0-alpha6",
     "ramda": "^0.25.0",
     "serve-static": "^1.13.2",
-    "uws": "^10.148.1"
+    "uws": "^10.148.1",
+    "wav": "^1.0.2"
   },
   "devDependecies": {
     "stylus": "^0.54.5",

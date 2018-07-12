@@ -19,16 +19,21 @@ arguments)}}(b))};e.init();p.Mousetrap=e;"undefined"!==typeof module&&module.exp
   <div class="card fadeIn">
     <div id="text" contenteditable="true">|0|</div>
     <audio id="audio" controls="controls" autoplay="autoplay" loop="loop" src="|1|"></audio>
-    <div class="buttons">
-      <button onclick="grade(1)" style="background-color:red">1</button>
-      <button onclick="grade(2)" style="background-color:orange">2</button>
-      <button onclick="grade(3)" style="background-color:grey">3</button>
-      <button onclick="grade(4)" style="background-color:MediumSeaGreen">4</button>
-      <button onclick="grade(5)" style="background-color:green">5</button>
+    <div id="grade">
+      <div class="button" onclick="grade(1)" style="background-color:red">1</div>
+      <div class="button" onclick="grade(2)" style="background-color:orange">2</div>
+      <div class="button" onclick="grade(3)" style="background-color:grey">3</div>
+      <div class="button" onclick="grade(4)" style="background-color:MediumSeaGreen">4</div>
+      <div class="button" onclick="grade(5)" style="background-color:green">5</div>
+    </div>
+    <div id="record">
+      <div class="button" onclick="record()">◉</div>
     </div>
   </div>
 </div>
 <div id="card"></div>
+<script src="binary.min.js"></script>
 <script src="global.js"></script>
 <script src="socket.js"></script>
 <script src="index.js"></script>
+<script src="recorder.js"></script>

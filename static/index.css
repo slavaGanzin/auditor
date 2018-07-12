@@ -1,3 +1,9 @@
+body {
+  display: flex;
+}
+.recording {
+  animation: fadeIn 1s infinite alternate;
+}
 #templates {
   display: none;
 }
@@ -7,20 +13,96 @@
   width: 50%;
   padding: 30px;
   text-align: center;
-  top: 50%;
-  left: 50%;
-  position: relative;
-  transform: translate(-50%, -50%);
+  margin: auto;
 }
 #card #text,
 #card audio {
   padding: 20px;
 }
 #card audio {
+  padding-left: 0;
+  padding-right: 0;
   width: 100%;
 }
-.buttons button {
+.button {
+  color: #fff;
   width: 70;
   height: 70;
   font-size: 50px;
+  line-height: 70px;
+  cursor: pointer;
+}
+#record .button {
+  margin: auto;
+  color: #f00;
+  width: 100%;
+}
+#grade {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-around;
+}
+@-moz-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@-webkit-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@-o-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@-moz-keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@-webkit-keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@-o-keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }

@@ -3,6 +3,8 @@
 const fs = require('fs')
 const path = require('path')
 const {exec} = require('child_process')
+const {EventEmitter} = require('events')
+const E = new EventEmitter()
 
 require('auto-require')({
   globaly: true,
@@ -14,6 +16,8 @@ function pp (...args) {
     process.stdout.write(JSON.stringify(x, null, ' ') + '\n')
   return args
 }
+
+const outWav = './data/recorder.wav'
 
 const validatedCsv =
   fs.createWriteStream('data/validated/validated.csv', {'flags': 'a'})
@@ -75,6 +79,9 @@ wss
       ws.events[message] = concat(defaultTo([pp], ws.events[message]), [f])
 
     readFiles(() => emit('files', files))
+
+    E.on('update:audio', () => emit('update:audio', {}))
+
     on('grade', ({text, quality, audio}) => {
       const validatedAudio = audio.replace('new', 'validated')
 
@@ -83,4 +90,25 @@ wss
 
       validatedCsv.write(`"${text.replace('"', "'")}",${validatedAudio.replace('data/validated/', '')},${quality}\n`)
     })
+
+
   })
+
+const binaryServer = binaryjs.BinaryServer({port: 9001})
+binaryServer.on('connection', function(client) {
+  console.log('new connection');
+  client.on('stream', function(stream, meta) {
+    console.log('new stream');
+    const fileWriter = new wav.FileWriter(outWav, {
+      channels: 1,
+      sampleRate: 48000,
+      bitDepth: 16
+    });
+    stream.pipe(fileWriter);
+
+    stream.on('end', function() {
+      fileWriter.end();
+      any2mp3(outWav, () => E.emit('update:audio', 123))
+    });
+  });
+});
