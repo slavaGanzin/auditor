@@ -1,6 +1,6 @@
-for (let k in R) {
+for (let k in R) 
   window[k] = R[k]
-}
+
 delete R
 
 const $ = document.querySelectorAll.bind(document)

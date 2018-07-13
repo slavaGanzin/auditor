@@ -21,8 +21,10 @@ module.exports = {
       got: false,
       feedparser: false,
       thenifyAll: false,
-
-
+      ws: false,
+      I: false,
+      $: false,
+      async: false,
       F: false,
       T: false,
       __: false,

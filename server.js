@@ -91,20 +91,20 @@ wss
   })
 
 const binaryServer = binaryjs.BinaryServer({port: 9001})
-binaryServer.on('connection', function(client) {
-  console.log('new connection');
-  client.on('stream', function(stream, meta) {
-    console.log('new stream');
+binaryServer.on('connection', (client) => {
+  console.log('new connection')
+  client.on('stream', (stream, meta) => {
+    console.log('new stream')
     const fileWriter = new wav.FileWriter(outWav, {
       channels: 1,
       sampleRate: 48000,
       bitDepth: 16
-    });
-    stream.pipe(fileWriter);
+    })
+    stream.pipe(fileWriter)
 
-    stream.on('end', function() {
-      fileWriter.end();
+    stream.on('end', () => {
+      fileWriter.end()
       any2mp3(outWav, () => E.emit('update:audio', 123))
-    });
-  });
-});
+    })
+  })
+})
