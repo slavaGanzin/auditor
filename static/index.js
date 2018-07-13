@@ -29,6 +29,9 @@ const grade = quality => {
   nextFile()
 }
 
+const rewind = sec =>
+  I('audio').currentTime = clamp(0, I('audio').duration, I('audio').currentTime - sec)
+
 const record = () => {
   if(window.recording) {
     $('#record .button')[0].classList.remove('recording')
@@ -52,8 +55,8 @@ Mousetrap
     I('text').focus()
   })
   .bind('space', () => I('audio').paused ? I('audio').play() : I('audio').pause())
-  .bind('left',  () => I('audio').currentTime = clamp(0, I('audio').duration,  I('audio').currentTime - 5))
-  .bind('right', () => I('audio').currentTime = clamp(0, I('audio').duration-1,  I('audio').currentTime + 5))
+  .bind('left', () => rewind(-5))
+  .bind('right', () => rewind(5))
   .bind('up', () => nextFile(-1))
   .bind('down', () => nextFile(1))
   .bind('1', () => grade(1))
