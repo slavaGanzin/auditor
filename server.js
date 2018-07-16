@@ -1,4 +1,4 @@
-#!/usr/bin/env node-dev
+#!/usr/bin/env node
 
 const fs = require('fs')
 const path = require('path')
@@ -8,8 +8,14 @@ const E = new EventEmitter()
 
 require('auto-require')({
   globaly: true,
-  toRoot: ['ramda']
+  toRoot: ['ramda'],
+  without: ['electron', 'pug','pug-cli','stylus']
 })
+
+const app = express()
+app.use(morgan('combined'))
+app.use('/data', serveStatic('data', {cacheControl: false}))
+app.use(serveStatic('static', {cacheControl: false}))
 
 function pp (...args) {
   for (let x of args)
@@ -27,10 +33,10 @@ const getNewFiles = () =>
 
 let files = []
 const readFiles = (cb = identity) => {
-  async.map(filter(test(/txt$/), getNewFiles()), (txt, cb) => {
+  async.mapLimit(filter(test(/txt$/), getNewFiles()), 100, (txt, cb) => {
     fs.readFile(txt, 'utf8', (e, text) => {
       const mp3 = txt.replace(/[^.]+$/, 'mp3')
-      if (!e) return cb(null, [text, mp3])
+      if (!e) return cb(null, [text, mp3, txt])
       console.error(e.message)
       cb()
     })
@@ -44,49 +50,22 @@ mp3queue.drain = readFiles
 
 map(mp3queue.push, reject(test(/mp3$|txt$/), getNewFiles()))
 
-const app = express()
-app.use(morgan('combined'))
-app.use('/data', serveStatic('data', {cacheControl: false}))
-app.use(serveStatic('static', {cacheControl: false}))
-app.listen(3000)
-
-const wss = new uws.Server({port: 3001})
-
-wss
+const server = require('http').createServer(app)
+const io = socketIo(server)
+io
   .on('connection', ws => {
-    ws.on('message', message => {
-      try {
-        const data = JSON.parse(message)
-        const [event] = Object.keys(data)
+    readFiles(() => ws.emit('files', files))
 
-        for (let f of ws.events[event] || [pp])
-          f(data[event])
-      } catch (e) {
-        pp(e, message)
-      }
-    })
+    E.on('update:audio', () => ws.emit('update:audio', {}))
 
-    ws.events = []
-    ws.sentDocs = []
-
-    const emit = curry((event, data) => {
-      if (ws.readyState == ws.OPEN)
-        return ws.send(JSON.stringify({[event]: data}))
-      return data
-    })
-
-    const on = (message, f) =>
-      ws.events[message] = concat(defaultTo([pp], ws.events[message]), [f])
-
-    readFiles(() => emit('files', files))
-
-    E.on('update:audio', () => emit('update:audio', {}))
-
-    on('grade', ({text, quality, audio, validated}) => {
+    ws.on('grade', ({text, quality, audio, validated, textFile}) => {
       mkdirp(path.dirname(validated))
-      fs.copyFile(audio, validated, e => fs.unlink(audio, identity))
+      fs.copyFile(audio, validated, e => {
+        fs.unlink(audio, identity)
+        fs.unlink(textFile, identity)
+      })
 
-      validatedCsv.write(`"${text.replace('"', "'")}",${validated},${quality}\n`)
+      validatedCsv.write(`"${text.replace('"', "'")}",${validated},${quality},${new Date()}\n`)
     })
   })
 
@@ -108,3 +87,5 @@ binaryServer.on('connection', (client) => {
     })
   })
 })
+
+server.listen(65533)

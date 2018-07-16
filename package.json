@@ -18,20 +18,20 @@
     "async": "^2.6.1",
     "auto-require": "github:viktor-ku/auto-require",
     "binaryjs": "^0.2.1",
+    "electron": "^2.0.5",
     "express": "^4.16.3",
     "fs-readdir-recursive": "^1.1.0",
     "mkdirp": "^0.5.1",
     "morgan": "^1.9.0",
     "mousetrap": "^1.6.2",
-    "pug-cli": "^1.0.0-alpha6",
     "ramda": "^0.25.0",
     "serve-static": "^1.13.2",
-    "uws": "^10.148.1",
+    "socket.io": "^2.1.1",
     "wav": "^1.0.2"
   },
-  "devDependecies": {
-    "stylus": "^0.54.5",
+  "devDependencies": {
     "pug": "^2.0.3",
-    "pug-cli": "^1.0.0-alpha6"
+    "pug-cli": "^1.0.0-alpha6",
+    "stylus": "^0.54.5"
   }
 }

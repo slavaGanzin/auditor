@@ -1,8 +1,14 @@
 script
+  include ../node_modules/socket.io-client/dist/socket.io.js
+  
+script
   include ../node_modules/ramda/dist/ramda.min.js
+script
   include ../node_modules/mousetrap/mousetrap.min.js
+  
 
-link(rel="stylesheet" type="text/css" href='index.css')
+style
+  include index.css
     
 #templates
   .card.fadeIn
@@ -16,8 +22,11 @@ link(rel="stylesheet" type="text/css" href='index.css')
   
 #card
   
-script(src='binary.min.js')
-script(src='global.js')
-script(src='socket.js')
-script(src='index.js')
-script(src='recorder.js')
+script
+  include binary.min.js
+script
+  include global.js
+script
+  include recorder.js
+script
+  include index.js

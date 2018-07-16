@@ -1,7 +1,7 @@
 window.ws = {}
 
 function WebSocketConnect (events = {}, buffer = [], debug = false) {
-  ws = new WebSocket('ws://0.0.0.0:3001')
+  ws = new WebSocket('ws://127.0.0.1:3001')
 
   ws.events = events
   ws.buffer = buffer

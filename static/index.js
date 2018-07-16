@@ -1,3 +1,5 @@
+const ws = io.connect('http://0.0.0.0:65533')
+
 let fileIndex = 0
 
 const redrawCard = () => {
@@ -17,6 +19,7 @@ const nextFile = (k = 1) => {
 }
 
 const getFileParams = () => ({
+  textFile: FILES[fileIndex][2],
   text: I('text').innerText,
   audio: I('audio').src.replace(/\?.*/,'').replace(/.*\/data\//, 'data/'),
   validated: FILES[fileIndex][1].replace('new', 'validated'),
@@ -64,4 +67,4 @@ Mousetrap
   .bind('3', () => grade(3))
   .bind('4', () => grade(4))
   .bind('5', () => grade(5))
-  .bind('r', record)
+  .bind(['r', 'к'], record)
