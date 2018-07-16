@@ -5,12 +5,19 @@ const path = require('path')
 const {exec} = require('child_process')
 const {EventEmitter} = require('events')
 const E = new EventEmitter()
+const express = require('express')
+const async = require('async')
+const binaryjs = require('binaryjs')
+const mkdirp = require('mkdirp')
+const fsReaddirRecursive = require('fs-readdir-recursive')
+const morgan = require('morgan')
+const serveStatic = require('serve-static')
+const socketIo = require('socket.io')
+const wav = require('wav')
 
-require('auto-require')({
-  globaly: true,
-  toRoot: ['ramda'],
-  without: ['electron', 'pug','pug-cli','stylus']
-})
+let R = require('ramda')
+for (let k in R)
+  global[k] = R[k]
 
 const app = express()
 app.use(morgan('combined'))
