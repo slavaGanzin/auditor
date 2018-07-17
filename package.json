@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./server",
     "dev": "node_modules/.bin/stylus --watch --out static static/index.styl & node_modules/.bin/pug --watch static --name-after-file --pretty --no-debug & node-dev ./server & wait",
-    "build": "sh -c 'cd build; electron-packager .. auditor --overwrite --all'"
+    "build": "sh -c 'mkdir build; cd build; electron-packager .. auditor --overwrite --all --asar'"
   },
   "repository": {
     "type": "git",

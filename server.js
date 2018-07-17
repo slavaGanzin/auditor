@@ -50,20 +50,13 @@ const start = dataFolder => {
     async.mapLimit(filter(test(/txt$/), getNewFiles()), 100, (txt, cb) => {
       fs.readFile(txt, 'utf8', (e, text) => {
         txt = txt.replace(dataFolder, 'data')
-        const mp3 = txt.replace(/[^.]+$/, 'mp3')
-        if (!e) return cb(null, [text, mp3, txt])
+        const audio = txt.replace(/[^.]+$/, 'wav')
+        if (!e) return cb(null, [text, audio, txt])
         console.error(e.message)
         cb()
       })
     }, (e, results) => cb(null, files = reject(isNil, results)))
   }
-
-  const any2mp3 = (file, cb) =>
-    exec(`sox ${file} ${file.replace(/[^.]+$/, 'mp3')}; rm ${file}`, cb)
-  const mp3queue = async.queue(any2mp3, 10)
-  mp3queue.drain = readFiles
-
-  map(mp3queue.push, reject(test(/mp3$|txt$/), getNewFiles()))
 
   const server = require('http').createServer(app)
   const io = socketIo(server)
@@ -101,7 +94,7 @@ const start = dataFolder => {
 
       stream.on('end', () => {
         fileWriter.end()
-        any2mp3(outWav, () => E.emit('update:audio', 123))
+        E.emit('update:audio', {})
       })
     })
   })
