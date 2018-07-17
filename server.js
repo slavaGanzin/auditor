@@ -14,10 +14,18 @@ const morgan = require('morgan')
 const serveStatic = require('serve-static')
 const socketIo = require('socket.io')
 const wav = require('wav')
+const chardet = require('chardet')
+const iconv = require('iconv-lite')
 
 let R = require('ramda')
 for (let k in R)
   global[k] = R[k]
+
+const any2unicode = text => {
+  let enc = chardet.detect(text)
+  if (/utf/i.test(enc)) enc = 'utf8'
+  return iconv.decode(Buffer.from(text), enc)
+}
 
 const start = dataFolder => {
   const validatedFolder = path.resolve(`${dataFolder}/../validated/`)
@@ -28,12 +36,6 @@ const start = dataFolder => {
   app.use('/data', serveStatic(validatedFolder, {cacheControl: false}))
   console.log(validatedFolder, dataFolder)
   app.use(serveStatic('static', {cacheControl: false}))
-
-  function pp (...args) {
-    for (let x of args)
-      process.stdout.write(JSON.stringify(x, null, ' ') + '\n')
-    return args
-  }
 
   const outWav = `${dataFolder}/recorder.wav`
 
@@ -47,14 +49,27 @@ const start = dataFolder => {
 
   let files = []
   const readFiles = (cb = identity) => {
-    async.mapLimit(filter(test(/txt$/), getNewFiles()), 100, (txt, cb) => {
-      fs.readFile(txt, 'utf8', (e, text) => {
-        txt = txt.replace(dataFolder, 'data')
-        const audio = txt.replace(/[^.]+$/, 'wav')
-        if (!e) return cb(null, [text, audio, txt])
-        console.error(e.message)
-        cb()
-      })
+    async.mapLimit(filter(test(/txt|wav$/), getNewFiles()), 100, (file, cb) => {
+      if (file.match(/txt$/)) {
+        chardet.detectFile(file, (e, encoding) => {
+          encoding = defaultTo('utf8', encoding)
+          fs.readFile(file, (e, text) => {
+            text = iconv.decode(text, encoding)
+            const txt = file.replace(dataFolder, 'data')
+            const audio = txt.replace(/[^.]+$/, 'wav')
+            if (!e) return cb(null, [text, audio, txt])
+            console.error(e.message)
+            cb()
+          })
+        })
+      } else {
+        const txt = file.replace(/wav$/, 'txt')
+        fs.stat(txt, (e) => {
+          if (!e) return cb()
+          cb(null, ['', file.replace(dataFolder, 'data'), ''])
+        })
+
+      }
     }, (e, results) => cb(null, files = reject(isNil, results)))
   }
 
@@ -67,7 +82,7 @@ const start = dataFolder => {
       E.on('update:audio', () => ws.emit('update:audio', {}))
 
       ws.on('grade', ({text, quality, audio, textFile}) => {
-        const validated = audio.replace('data', validatedFolder).replace('recorder', 'recorded/'+(new Date).getTime())
+        let validated = audio.replace('data', validatedFolder).replace('recorder', 'recorded/'+(new Date).getTime())
         const original = audio.replace('data', dataFolder)
         mkdirp(path.dirname(validated))
         fs.copyFile(original, validated, e => {
@@ -76,15 +91,15 @@ const start = dataFolder => {
           fs.unlink(textFile.replace('data', dataFolder), identity)
         })
 
-        validatedCsv.write(`"${text.replace('"', "'")}",${validated.replace(validatedFolder+'/','')},${quality},"${new Date()}"\n`)
+        validated = any2unicode(validated.replace(validatedFolder+'/',''))
+
+        validatedCsv.write(`"${text.replace('"', "'")}",${validated},${quality},"${new Date()}"\n`)
       })
     })
 
   const binaryServer = binaryjs.BinaryServer({port: 9001})
   binaryServer.on('connection', (client) => {
-    console.log('new connection')
     client.on('stream', (stream, meta) => {
-      console.log('new stream')
       const fileWriter = new wav.FileWriter(outWav, {
         channels: 1,
         sampleRate: 48000,

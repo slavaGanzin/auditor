@@ -11,7 +11,7 @@ function createWindow () {
   if (!dataFolder) return app.quit()
   require('./server')(dataFolder[0])
 
-  mainWindow = new BrowserWindow({width: 800, height: 600, frame: false, title: 'Auditor'})
+  mainWindow = new BrowserWindow({title: 'Wartech Auditor'})
 
   mainWindow.loadURL('http://127.0.0.1:65533')
 
