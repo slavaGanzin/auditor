@@ -1,14 +1,17 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
+const {app, BrowserWindow, dialog} = require('electron')
 //
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-require('./server')
 
 let mainWindow
 
+
 function createWindow () {
-  // Create the browser window.
+  const dataFolder = dialog.showOpenDialog({properties: ['openDirectory']})
+  if (!dataFolder) return app.quit()
+  require('./server')(dataFolder[0])
+
   mainWindow = new BrowserWindow({width: 800, height: 600, frame: false, title: 'Auditor'})
 
   mainWindow.loadURL('http://127.0.0.1:65533')

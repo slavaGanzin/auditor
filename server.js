@@ -19,80 +19,97 @@ let R = require('ramda')
 for (let k in R)
   global[k] = R[k]
 
-const app = express()
-app.use(morgan('combined'))
-app.use('/data', serveStatic('data', {cacheControl: false}))
-app.use(serveStatic('static', {cacheControl: false}))
+const start = dataFolder => {
+  const validatedFolder = path.resolve(`${dataFolder}/../validated/`)
 
-function pp (...args) {
-  for (let x of args)
-    process.stdout.write(JSON.stringify(x, null, ' ') + '\n')
-  return args
-}
+  const app = express()
+  app.use(morgan('combined'))
+  app.use('/data', serveStatic(dataFolder, {cacheControl: false}))
+  app.use('/data', serveStatic(validatedFolder, {cacheControl: false}))
+  console.log(validatedFolder, dataFolder)
+  app.use(serveStatic('static', {cacheControl: false}))
 
-const outWav = './data/recorder.wav'
+  function pp (...args) {
+    for (let x of args)
+      process.stdout.write(JSON.stringify(x, null, ' ') + '\n')
+    return args
+  }
 
-const validatedCsv =
-  fs.createWriteStream('data/validated/validated.csv', {'flags': 'a'})
+  const outWav = `${dataFolder}/recorder.wav`
 
-const getNewFiles = () =>
-  map(x => `data/new/${x}`, fsReaddirRecursive('data/new'))
+  mkdirp(validatedFolder)
 
-let files = []
-const readFiles = (cb = identity) => {
-  async.mapLimit(filter(test(/txt$/), getNewFiles()), 100, (txt, cb) => {
-    fs.readFile(txt, 'utf8', (e, text) => {
-      const mp3 = txt.replace(/[^.]+$/, 'mp3')
-      if (!e) return cb(null, [text, mp3, txt])
-      console.error(e.message)
-      cb()
-    })
-  }, (e, results) => cb(null, files = reject(isNil, results)))
-}
+  const validatedCsv =
+    fs.createWriteStream(`${validatedFolder}/validated.csv`, {'flags': 'a'})
 
-const any2mp3 = (file, cb) =>
-  exec(`sox ${file} ${file.replace(/[^.]+$/, 'mp3')}; rm ${file}`, cb)
-const mp3queue = async.queue(any2mp3, 10)
-mp3queue.drain = readFiles
+  const getNewFiles = () =>
+    map(x => `${dataFolder}/${x}`, fsReaddirRecursive(dataFolder))
 
-map(mp3queue.push, reject(test(/mp3$|txt$/), getNewFiles()))
-
-const server = require('http').createServer(app)
-const io = socketIo(server)
-io
-  .on('connection', ws => {
-    readFiles(() => ws.emit('files', files))
-
-    E.on('update:audio', () => ws.emit('update:audio', {}))
-
-    ws.on('grade', ({text, quality, audio, validated, textFile}) => {
-      mkdirp(path.dirname(validated))
-      fs.copyFile(audio, validated, e => {
-        fs.unlink(audio, identity)
-        fs.unlink(textFile, identity)
+  let files = []
+  const readFiles = (cb = identity) => {
+    async.mapLimit(filter(test(/txt$/), getNewFiles()), 100, (txt, cb) => {
+      fs.readFile(txt, 'utf8', (e, text) => {
+        txt = txt.replace(dataFolder, 'data')
+        const mp3 = txt.replace(/[^.]+$/, 'mp3')
+        if (!e) return cb(null, [text, mp3, txt])
+        console.error(e.message)
+        cb()
       })
+    }, (e, results) => cb(null, files = reject(isNil, results)))
+  }
 
-      validatedCsv.write(`"${text.replace('"', "'")}",${validated},${quality},${new Date()}\n`)
+  const any2mp3 = (file, cb) =>
+    exec(`sox ${file} ${file.replace(/[^.]+$/, 'mp3')}; rm ${file}`, cb)
+  const mp3queue = async.queue(any2mp3, 10)
+  mp3queue.drain = readFiles
+
+  map(mp3queue.push, reject(test(/mp3$|txt$/), getNewFiles()))
+
+  const server = require('http').createServer(app)
+  const io = socketIo(server)
+  io
+    .on('connection', ws => {
+      readFiles(() => ws.emit('files', files))
+
+      E.on('update:audio', () => ws.emit('update:audio', {}))
+
+      ws.on('grade', ({text, quality, audio, textFile}) => {
+        const validated = audio.replace('data', validatedFolder).replace('recorder', 'recorded/'+(new Date).getTime())
+        const original = audio.replace('data', dataFolder)
+        mkdirp(path.dirname(validated))
+        fs.copyFile(original, validated, e => {
+          if (e) return console.error(e)
+          fs.unlink(original, identity)
+          fs.unlink(textFile.replace('data', dataFolder), identity)
+        })
+
+        validatedCsv.write(`"${text.replace('"', "'")}",${validated.replace(validatedFolder+'/','')},${quality},"${new Date()}"\n`)
+      })
+    })
+
+  const binaryServer = binaryjs.BinaryServer({port: 9001})
+  binaryServer.on('connection', (client) => {
+    console.log('new connection')
+    client.on('stream', (stream, meta) => {
+      console.log('new stream')
+      const fileWriter = new wav.FileWriter(outWav, {
+        channels: 1,
+        sampleRate: 48000,
+        bitDepth: 16
+      })
+      stream.pipe(fileWriter)
+
+      stream.on('end', () => {
+        fileWriter.end()
+        any2mp3(outWav, () => E.emit('update:audio', 123))
+      })
     })
   })
 
-const binaryServer = binaryjs.BinaryServer({port: 9001})
-binaryServer.on('connection', (client) => {
-  console.log('new connection')
-  client.on('stream', (stream, meta) => {
-    console.log('new stream')
-    const fileWriter = new wav.FileWriter(outWav, {
-      channels: 1,
-      sampleRate: 48000,
-      bitDepth: 16
-    })
-    stream.pipe(fileWriter)
+  server.listen(65533)
+}
 
-    stream.on('end', () => {
-      fileWriter.end()
-      any2mp3(outWav, () => E.emit('update:audio', 123))
-    })
-  })
-})
-
-server.listen(65533)
+if (process.argv[2]) {
+  start(process.argv[2])
+}
+module.exports = start

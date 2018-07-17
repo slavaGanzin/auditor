@@ -21,8 +21,7 @@ const nextFile = (k = 1) => {
 const getFileParams = () => ({
   textFile: FILES[fileIndex][2],
   text: I('text').innerText,
-  audio: I('audio').src.replace(/\?.*/,'').replace(/.*\/data\//, 'data/'),
-  validated: FILES[fileIndex][1].replace('new', 'validated'),
+  audio: I('audio').src.replace(/\?.*/,'').replace(/.*\/data\//, 'data/')
 })
 
 const grade = quality => {
