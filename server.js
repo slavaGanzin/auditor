@@ -21,12 +21,6 @@ let R = require('ramda')
 for (let k in R)
   global[k] = R[k]
 
-const any2unicode = text => {
-  let enc = chardet.detect(text)
-  if (/utf/i.test(enc)) enc = 'utf8'
-  return iconv.decode(Buffer.from(text), enc)
-}
-
 const start = (dataFolder, staticPath = 'static') => {
   const validatedFolder = path.resolve(`${dataFolder}/../validated/`)
 
@@ -91,9 +85,7 @@ const start = (dataFolder, staticPath = 'static') => {
           fs.unlink(textFile.replace('data', dataFolder), identity)
         })
 
-        validated = any2unicode(validated.replace(validatedFolder+'/',''))
-
-        validatedCsv.write(`"${text.replace('"', "'")}",${validated},${quality},"${new Date()}"${EOL}`)
+        validatedCsv.write(`"${text.replace('"', "'")}",${validated.replace(validatedFolder+'/','')},${quality},"${new Date()}"${EOL}`)
       })
     })
 
