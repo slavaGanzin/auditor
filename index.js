@@ -5,13 +5,15 @@ const {app, BrowserWindow, dialog} = require('electron')
 
 let mainWindow
 
+const path = require('path')
 
 function createWindow () {
   const dataFolder = dialog.showOpenDialog({properties: ['openDirectory']})
   if (!dataFolder) return app.quit()
-  require('./server')(dataFolder[0])
+  require('./server')(dataFolder[0], path.join(app.getAppPath(), 'static'))
 
   mainWindow = new BrowserWindow({title: 'Wartech Auditor'})
+  mainWindow.maximize()
 
   mainWindow.loadURL('http://127.0.0.1:65533')
 

@@ -1,4 +1,4 @@
-const ws = io.connect('http://0.0.0.0:65533')
+const ws = io.connect('http://127.0.0.1:65533')
 
 let fileIndex = 0
 

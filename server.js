@@ -2,7 +2,7 @@
 
 const fs = require('fs')
 const path = require('path')
-const {exec} = require('child_process')
+var {EOL} = require("os");
 const {EventEmitter} = require('events')
 const E = new EventEmitter()
 const express = require('express')
@@ -27,15 +27,15 @@ const any2unicode = text => {
   return iconv.decode(Buffer.from(text), enc)
 }
 
-const start = dataFolder => {
+const start = (dataFolder, staticPath = 'static') => {
   const validatedFolder = path.resolve(`${dataFolder}/../validated/`)
 
+  console.log(staticPath)
   const app = express()
   app.use(morgan('combined'))
   app.use('/data', serveStatic(dataFolder, {cacheControl: false}))
   app.use('/data', serveStatic(validatedFolder, {cacheControl: false}))
-  console.log(validatedFolder, dataFolder)
-  app.use(serveStatic('static', {cacheControl: false}))
+  app.use(serveStatic(staticPath, {cacheControl: false}))
 
   const outWav = `${dataFolder}/recorder.wav`
 
@@ -93,7 +93,7 @@ const start = dataFolder => {
 
         validated = any2unicode(validated.replace(validatedFolder+'/',''))
 
-        validatedCsv.write(`"${text.replace('"', "'")}",${validated},${quality},"${new Date()}"\n`)
+        validatedCsv.write(`"${text.replace('"', "'")}",${validated},${quality},"${new Date()}"${EOL}`)
       })
     })
 
@@ -117,7 +117,7 @@ const start = dataFolder => {
   server.listen(65533)
 }
 
-if (process.argv[2]) {
+if (process.argv[2])
   start(process.argv[2])
-}
+
 module.exports = start
