@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./server",
-    "dev": "node_modules/.bin/stylus --watch --out static static/index.styl & node_modules/.bin/pug --watch static --name-after-file --pretty --no-debug & node-dev ./server & wait",
+    "dev": "node_modules/.bin/stylus --watch --out static static/index.styl & node_modules/.bin/pug --watch static --name-after-file --pretty --no-debug & node-dev ./server '~/Папа напрокат' & wait",
     "build": "sh -c 'node_modules/.bin/stylus --out static static/index.styl; node_modules/.bin/pug static --name-after-file --pretty --no-debug; rm -rf build; mkdir build; cd build; electron-packager .. auditor --overwrite --platform win32 --prune=true --version-string.CompanyName=Wartech --version-string.FileDescription=Wartech --version-string.ProductName=Auditor; for i in *; do zip -r $i.zip $i; done'"
   },
   "repository": {

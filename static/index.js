@@ -7,6 +7,8 @@ const redrawCard = () => {
   Mousetrap(I('text')).bind('escape', e => {
     blurAll()
   })
+  Mousetrap(I("audio")).bind('space', e => e.stopPropagation())
+
   I('grade').style.opacity = 0
   I('audio').addEventListener('progress',
     x => I('grade').style.opacity = 1
@@ -57,8 +59,8 @@ Mousetrap
     I('text').focus()
   })
   .bind('space', () => I('audio').paused ? I('audio').play() : I('audio').pause())
-  .bind('left', () => rewind(-5))
-  .bind('right', () => rewind(5))
+  .bind('left', () => rewind(-1))
+  .bind('right', () => rewind(1))
   .bind('up', () => nextFile(-1))
   .bind('down', () => nextFile(1))
   .bind('1', () => grade(1))
@@ -66,4 +68,4 @@ Mousetrap
   .bind('3', () => grade(3))
   .bind('4', () => grade(4))
   .bind('5', () => grade(5))
-  .bind(['r', 'к'], record)
+  // .bind(['r', 'к'], record)

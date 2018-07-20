@@ -16,6 +16,7 @@ const socketIo = require('socket.io')
 const wav = require('wav')
 const chardet = require('chardet')
 const iconv = require('iconv-lite')
+const querystring = require("querystring")
 
 let R = require('ramda')
 for (let k in R)
@@ -24,7 +25,6 @@ for (let k in R)
 const start = (dataFolder, staticPath = 'static') => {
   const validatedFolder = path.resolve(`${dataFolder}/../validated/`)
 
-  console.log(staticPath)
   const app = express()
   app.use(morgan('combined'))
   app.use('/data', serveStatic(dataFolder, {cacheControl: false}))
@@ -40,30 +40,21 @@ const start = (dataFolder, staticPath = 'static') => {
 
   const getNewFiles = () =>
     map(x => `${dataFolder}/${x}`, fsReaddirRecursive(dataFolder))
-
   let files = []
   const readFiles = (cb = identity) => {
-    async.mapLimit(filter(test(/txt|wav$/), getNewFiles()), 100, (file, cb) => {
-      if (file.match(/txt$/)) {
-        chardet.detectFile(file, (e, encoding) => {
-          encoding = defaultTo('utf8', encoding)
-          fs.readFile(file, (e, text) => {
-            text = iconv.decode(text, encoding)
-            const txt = file.replace(dataFolder, 'data')
-            const audio = txt.replace(/[^.]+$/, 'wav')
-            if (!e) return cb(null, [text, audio, txt])
-            console.error(e.message)
-            cb()
-          })
-        })
-      } else {
-        const txt = file.replace(/wav$/, 'txt')
-        fs.stat(txt, (e) => {
-          if (!e) return cb()
-          cb(null, ['', file.replace(dataFolder, 'data'), ''])
-        })
+    async.mapLimit(filter(test(/(wav|mp3)$/), getNewFiles()), 100, (file, cb) => {
+      const txt = file.replace(/(wav|mp3)$/, 'txt')
+      chardet.detectFile(txt, (e, encoding) => {
+        fs.readFile(txt, (e, text) => {
+          if (e) return cb(null, ['', file.replace(dataFolder, 'data'), ''])
 
-      }
+          encoding = /utf/i.test(encoding) ? 'utf8' : 'win1251'
+
+          text = iconv.decode(text, encoding).replace('\\n', ' ')
+
+          return cb(null, [text, file.replace(dataFolder, 'data'), ''])
+        })
+      })
     }, (e, results) => cb(null, files = reject(isNil, results)))
   }
 
@@ -76,6 +67,7 @@ const start = (dataFolder, staticPath = 'static') => {
       E.on('update:audio', () => ws.emit('update:audio', {}))
 
       ws.on('grade', ({text, quality, audio, textFile}) => {
+        audio = querystring.unescape(audio)
         let validated = audio.replace('data', validatedFolder).replace('recorder', 'recorded/'+(new Date).getTime())
         const original = audio.replace('data', dataFolder)
         mkdirp(path.dirname(validated))
