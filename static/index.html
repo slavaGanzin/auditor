@@ -137,7 +137,7 @@ arguments)}}(b))};e.init();p.Mousetrap=e;"undefined"!==typeof module&&module.exp
 </style>
 <div id="templates">
   <div class="card fadeIn">
-    <div id="text" contenteditable="true" onfocus="I('audio').pause()" onblur="I('audio').play()">|0|</div>
+    <div id="text" contenteditable="true" onfocus="I('audio').pause()" onblur="I('audio').play()" onkeyup="updateText()">|0|</div>
     <audio id="audio" controls="controls" autoplay="autoplay" loop="loop" src="|1|"></audio>
     <div id="grade">
       <div class="button" onclick="grade(1)" style="background-color:red">1</div>
@@ -253,6 +253,10 @@ const redrawCard = () => {
   I('audio').addEventListener('progress',
     x => I('grade').style.opacity = 1
   )
+}
+
+const updateText = () => {
+  FILES[fileIndex][0] = I('text').innerText
 }
 
 const nextFile = (k = 1) => {

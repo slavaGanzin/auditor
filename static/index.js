@@ -15,6 +15,10 @@ const redrawCard = () => {
   )
 }
 
+const updateText = () => {
+  FILES[fileIndex][0] = I('text').innerText
+}
+
 const nextFile = (k = 1) => {
   fileIndex = clamp(0, length(FILES), fileIndex + k)
   redrawCard()

@@ -12,7 +12,7 @@ style
     
 #templates
   .card.fadeIn
-    #text(contenteditable='true' onfocus="I('audio').pause()" onblur="I('audio').play()") |0|
+    #text(contenteditable='true' onfocus="I('audio').pause()" onblur="I('audio').play()" onkeyup='updateText()') |0|
     audio#audio(controls autoplay loop src="|1|")
     #grade
       each n, color in {'red':1, 'orange': 2, 'grey': 3, 'MediumSeaGreen': 4, 'green': 5}
