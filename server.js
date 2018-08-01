@@ -77,7 +77,11 @@ const start = (dataFolder, staticPath = 'static') => {
           fs.unlink(textFile.replace('data', dataFolder), identity)
         })
 
-        validatedCsv.write(`"${text.replace('"', "'")}",${validated.replace(validatedFolder+'/','')},${quality},"${(new Date()).toGMTString()}"${EOL}`)
+        text = text.replace('"', "'").replace(/\n/g, '\\n')
+        validated = validated.replace(validatedFolder+'/','')
+        let now = (new Date()).toGMTString()
+
+        validatedCsv.write(`"${text}",${validated},${quality},"${now}"${EOL}`)
       })
     })
 
