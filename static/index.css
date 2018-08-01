@@ -20,6 +20,10 @@ body {
 #card audio {
   padding: 20px;
 }
+#card #text {
+  white-space: pre-line;
+  text-align: left;
+}
 #card audio {
   padding-left: 0;
   padding-right: 0;

@@ -38,7 +38,7 @@ const grade = quality => {
 }
 
 const rewind = sec =>
-  I('audio').currentTime = clamp(0, I('audio').duration, I('audio').currentTime - sec)
+  I('audio').currentTime = clamp(0, I('audio').duration, I('audio').currentTime + sec)
 
 const record = () => {
   if(window.recording) {
@@ -65,6 +65,8 @@ Mousetrap
   .bind('space', () => I('audio').paused ? I('audio').play() : I('audio').pause())
   .bind('left', () => rewind(-1))
   .bind('right', () => rewind(1))
+  .bind('ctrl+left', () => rewind(-10))
+  .bind('ctrl+right', () => rewind(10))
   .bind('up', () => nextFile(-1))
   .bind('down', () => nextFile(1))
   .bind('1', () => grade(1))
