@@ -272,6 +272,7 @@ module.exports = {
     },
     "extends": "eslint:recommended",
     "rules": {
+        "no-delete-var": "off",
         "block-scoped-var" : 'error',
         "callback-return": "error",
         camelcase: ["warn", {properties: "always"}],

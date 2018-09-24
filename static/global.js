@@ -1,4 +1,4 @@
-for (let k in R) 
+for (let k in R)
   window[k] = R[k]
 
 delete R
@@ -6,7 +6,7 @@ delete R
 const $ = document.querySelectorAll.bind(document)
 const I = document.getElementById.bind(document)
 const T = template => obj =>
-  compose(...values(mapObjIndexed((v, k) => replace(`|${k}|`, String(v)), obj)))(template)
+  compose(...values(mapObjIndexed((v, k) => replace(new RegExp(`\\{${k}\\}`, 'g'), String(v)), obj)))(template)
 
 map(template => {
   T[template.classList[0]] = T(template.outerHTML)
