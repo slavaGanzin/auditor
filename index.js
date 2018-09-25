@@ -1,4 +1,4 @@
-const {app, BrowserWindow, dialog} = require('electron')
+const {session, app, BrowserWindow, dialog} = require('electron')
 //
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -8,6 +8,8 @@ let mainWindow
 const path = require('path')
 
 function createWindow () {
+  session.defaultSession.clearCache(identity)
+
   const dataFolder = dialog.showOpenDialog({properties: ['openDirectory']})
   if (!dataFolder) return app.quit()
   require('./server')(dataFolder[0], path.join(app.getAppPath(), 'static'))

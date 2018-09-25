@@ -28,10 +28,10 @@ const start = (dataFolder, staticPath = 'static') => {
 
   const app = express()
   app.use(morgan('combined'))
-  app.use('/data', serveStatic(dataFolder))
+  app.use('/data', serveStatic(dataFolder, {cacheControl: false}))
   app.use(serveStatic(staticPath, {cacheControl: false}))
 
-  const outWav = `${dataFolder}/recorder.wav`
+  const outWav = path.resolve(dataFolder, 'recorder.wav')
 
   mkdirp(validatedFolder)
 
@@ -40,7 +40,7 @@ const start = (dataFolder, staticPath = 'static') => {
   const validatedCsv = fs.createWriteStream(validateCsvPath, {'flags': 'a'})
 
   const getNewFiles = () =>
-    map(x => `${dataFolder}/${x}`, fsReaddirRecursive(dataFolder))
+    map(x => path.resolve(dataFolder, x), fsReaddirRecursive(dataFolder))
 
   const readFiles = (cb = identity) => {
     async.mapLimit(filter(test(audioRegexp), getNewFiles()), 100, (file, cb) => {
