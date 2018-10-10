@@ -39,11 +39,15 @@ const start = (dataFolder, staticPath = 'static') => {
   console.log(`validated: ${validateCsvPath}`)
   const validatedCsv = fs.createWriteStream(validateCsvPath, {'flags': 'a'})
 
-  const getNewFiles = () =>
-    map(x => path.resolve(dataFolder, x), fsReaddirRecursive(dataFolder))
+  const getNewFiles = compose(
+    filter(test(/\/validated\//)),
+    filter(test(audioRegexp)),
+    map(x => path.resolve(dataFolder, x)),
+    () => fsReaddirRecursive(dataFolder)
+  )
 
   const readFiles = (cb = identity) => {
-    async.mapLimit(filter(test(audioRegexp), getNewFiles()), 100, (file, cb) => {
+    async.mapLimit(getNewFiles(), 100, (file, cb) => {
       const txt = file.replace(audioRegexp, 'txt')
       chardet.detectFile(txt, (e, encoding) => {
         fs.readFile(txt, (e, text) => {
