@@ -4,7 +4,6 @@ let fileIndex = 0
 
 const redrawCard = () => {
   T.card(FILES[fileIndex])
-  T.hour({fileIndex})
   Mousetrap(I('text')).bind('escape', e => {
     blurAll()
   })
