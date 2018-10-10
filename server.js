@@ -40,6 +40,7 @@ const start = (dataFolder, staticPath = 'static') => {
   const validatedCsv = fs.createWriteStream(validateCsvPath, {'flags': 'a'})
 
   const getNewFiles = compose(
+    sort((a, b) => a.localeCompare(b)),
     reject(test(/\/validated\//)),
     filter(test(audioRegexp)),
     map(x => path.resolve(dataFolder, x)),
