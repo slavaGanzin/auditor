@@ -89,7 +89,7 @@ const start = (dataFolder, staticPath = 'static') => {
       })
     })
 
-  const binaryServer = binaryjs.BinaryServer({port: 9001})
+  const binaryServer = binaryjs.BinaryServer({port: 9002})
   binaryServer.on('connection', (client) => {
     client.on('stream', (stream, meta) => {
       const fileWriter = new wav.FileWriter(outWav, {

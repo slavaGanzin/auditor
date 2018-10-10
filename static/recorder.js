@@ -1,7 +1,7 @@
 //https://github.com/gabrielpoca/browser-pcm-stream
 
 (function(window) {
-  let client = new BinaryClient('ws://127.0.0.1:9001')
+  let client = new BinaryClient('ws://127.0.0.1:9002')
 
   client.on('open', () => {
     // window.Stream = client.createStream();
@@ -54,9 +54,9 @@
       let l = buffer.length
       let buf = new Int16Array(l)
 
-      while (l--) 
+      while (l--)
         buf[l] = buffer[l]*0xFFFF //convert to 16 bit
-      
+
       return buf.buffer
     }
   })
