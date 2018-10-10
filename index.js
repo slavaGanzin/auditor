@@ -8,7 +8,7 @@ let mainWindow
 const path = require('path')
 
 function createWindow () {
-  session.defaultSession.clearCache(identity)
+  session.defaultSession.clearCache(() => {})
 
   const dataFolder = dialog.showOpenDialog({properties: ['openDirectory']})
   if (!dataFolder) return app.quit()
