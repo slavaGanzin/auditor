@@ -40,7 +40,7 @@ const start = (dataFolder, staticPath = 'static') => {
   const validatedCsv = fs.createWriteStream(validateCsvPath, {'flags': 'a'})
 
   const getNewFiles = compose(
-    filter(test(/\/validated\//)),
+    reject(test(/\/validated\//)),
     filter(test(audioRegexp)),
     map(x => path.resolve(dataFolder, x)),
     () => fsReaddirRecursive(dataFolder)
