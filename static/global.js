@@ -9,9 +9,15 @@ const T = template => obj =>
   compose(...values(mapObjIndexed((v, k) => replace(new RegExp(`\\{${k}\\}`, 'g'), String(v)), obj)))(template)
 
 map(template => {
-  T[template.classList[0]] = T(template.outerHTML)
-  template.parentNode.removeChild(template)
+  const id = template.classList[0]
+  T[id] = compose(
+    html => I(id).innerHTML = html,
+    T(template.outerHTML)
+  )
 }, I('templates').children)
+
+$('body')[0].removeChild(I('templates'))
+
 
 function blurAll(){
   const tmp = document.createElement("input")

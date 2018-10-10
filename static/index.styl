@@ -1,6 +1,8 @@
 body
   user-select: none;
   display: flex
+  flex-direction: column;
+  font-family: sans-serif
 
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 @keyframes fadeOut { from { opacity:1; } to { opacity:0; } }
@@ -23,12 +25,17 @@ fadeOut(duration = .3s, display = none)
   display: none
 
 #card
-  font-family: sans-serif
+  text-align: center
   font-size: 24px
   width: 50%
   padding: 30px
-  text-align: center
-  margin: auto;
+  margin: 0 auto;
+  height: 60vh
+  display: flex
+
+  .card
+    align-self: flex-end;
+    width: 100%
 
   #text, audio
     padding: 20px
@@ -56,7 +63,13 @@ fadeOut(duration = .3s, display = none)
     color: red
     width: 100%
 
+
 #grade
+  text-align: center
+  margin: 0 auto;
   margin-bottom: 10px
   display: flex
   justify-content: space-around;
+
+  .button
+    margin: 0 10px 0 10px

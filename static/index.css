@@ -1,6 +1,8 @@
 body {
   user-select: none;
   display: flex;
+  flex-direction: column;
+  font-family: sans-serif;
 }
 .recording {
   animation: fadeIn 1s infinite alternate;
@@ -9,12 +11,17 @@ body {
   display: none;
 }
 #card {
-  font-family: sans-serif;
+  text-align: center;
   font-size: 24px;
   width: 50%;
   padding: 30px;
-  text-align: center;
-  margin: auto;
+  margin: 0 auto;
+  height: 60vh;
+  display: flex;
+}
+#card .card {
+  align-self: flex-end;
+  width: 100%;
 }
 #card #text,
 #card audio {
@@ -43,9 +50,14 @@ body {
   width: 100%;
 }
 #grade {
+  text-align: center;
+  margin: 0 auto;
   margin-bottom: 10px;
   display: flex;
   justify-content: space-around;
+}
+#grade .button {
+  margin: 0 10px 0 10px;
 }
 @-moz-keyframes fadeIn {
   from {

@@ -3,16 +3,17 @@ const ws = io.connect('http://127.0.0.1:65533')
 let fileIndex = 0
 
 const redrawCard = () => {
-  I('card').innerHTML = T.card(FILES[fileIndex])
+  T.card(FILES[fileIndex])
+  T.hour({fileIndex})
   Mousetrap(I('text')).bind('escape', e => {
     blurAll()
   })
   Mousetrap(I("audio")).bind('space', e => e.stopPropagation())
 
-  I('grade').style.opacity = 0
-  I('audio').addEventListener('progress',
-    x => I('grade').style.opacity = 1
-  )
+  // I('grade').style.opacity = 0
+  // I('audio').addEventListener('progress',
+  //   x => I('grade').style.opacity = 1
+  // )
 }
 
 const updateText = () => {
@@ -33,6 +34,7 @@ const getFileParams = () => ({
 const grade = quality => {
   const grade = getFileParams()
   grade.quality = quality
+
   ws.emit('grade', grade)
   nextFile()
 }
