@@ -86,7 +86,7 @@ const start = (dataFolder, staticPath = 'static') => {
           fs.unlink(textFile.replace('data', dataFolder), identity)
         })
 
-        text = text.replace('"', "'").replace(/\n/g, '\\n')
+        text = text.replace(/"/g, "'").replace(/\n/g, '\\n')
         validated = validated.replace(validatedFolder+path.sep,'')
         let now = (new Date()).toGMTString()
 
