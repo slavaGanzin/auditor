@@ -17,6 +17,10 @@ const wav = require('wav')
 const chardet = require('chardet')
 const iconv = require('iconv-lite')
 const querystring = require("querystring")
+const csv = require('oh-csv')
+const encoder = csv.wrapForExcel(new csv.Encoder({
+  fields: ['text', 'validated', 'quality', 'now']
+}))
 
 for (let k in require('ramda'))
   global[k] = require('ramda')[k]
@@ -31,19 +35,21 @@ const start = (dataFolder, staticPath = 'static') => {
   app.use('/data', serveStatic(dataFolder, {cacheControl: false}))
   app.use(serveStatic(staticPath, {cacheControl: false}))
 
-  const outWav = path.resolve(dataFolder, 'recorder.wav')
+  const outWav = `${dataFolder}/recorder.wav`
 
   mkdirp(validatedFolder)
 
   const validateCsvPath = path.resolve(validatedFolder, 'validated.csv')
   console.log(`validated: ${validateCsvPath}`)
   const validatedCsv = fs.createWriteStream(validateCsvPath, {'flags': 'a'})
+  encoder.pipe(validatedCsv)
+  encoder.pipe(process.stdout)
 
   const getNewFiles = compose(
     sort((a, b) => a.localeCompare(b)),
     reject(test(/\/validated\//)),
     filter(test(audioRegexp)),
-    map(x => path.resolve(dataFolder, x)),
+    map(x => `${dataFolder}/${x}`),
     () => fsReaddirRecursive(dataFolder)
   )
 
@@ -88,9 +94,9 @@ const start = (dataFolder, staticPath = 'static') => {
 
         text = text.replace(/"/g, "'").replace(/\n/g, '\\n')
         validated = validated.replace(validatedFolder+path.sep,'')
-        let now = (new Date()).toGMTString()
+        const now = (new Date()).toGMTString()
 
-        validatedCsv.write(`"${text}",${validated},${quality},"${now}"${EOL}`)
+        encoder.write({text, validated, quality, now})
       })
     })
 

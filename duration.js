@@ -3,6 +3,10 @@ const fs = require('fs')
 const cp = require('child_process')
 const path = require('path')
 const fsReaddirRecursive = require('fs-readdir-recursive')
+const csv = require('oh-csv')
+const encoder = new csv.Parser({
+  fields: ['text', 'validated', 'quality', 'now']
+})
 
 for (let k in require('ramda'))
   global[k] = require('ramda')[k]
