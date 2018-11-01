@@ -30,14 +30,16 @@ const getDuration = x => new Promise((resolve, reject) =>
 
 const getDurationsOfOneFile = ([d, csv]) => pipe(
   split('\n'),
+  filter(test(new RegExp(process.argv[3]))),
   map(replace(/,[^,]+validated([^,]+)/, `,/$1`)),
   map(replace(/.*,([^,]*mp3).*/g, `${d}/$1`)),
   map(replace(/\r/g, ``)),
   map(replace(/\/\//g, `/`)),
+  tap(x => console.log(`total: ${length(x)}`)),
   map(getDuration),
 )(csv)
 
-const validated = pipe(
+const validatedCSVFromFolder = pipe(
   fsReaddirRecursive,
   filter(test(/\.csv$/)),
   map(x => [
@@ -46,7 +48,7 @@ const validated = pipe(
   ])
 )
 
-Promise.all(flatten(map(getDurationsOfOneFile, validated(process.argv[2]))))
+Promise.all(flatten(map(getDurationsOfOneFile, validatedCSVFromFolder(process.argv[2]))))
   .then(flatten)
   .then(reject(x => x > 60))
   .then(sum)
