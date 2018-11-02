@@ -16,6 +16,7 @@ const DIR = path.resolve(process.argv[2]) + '/'
 
 const parser = new csv.Parser(csvOptions)
 const encoder = new csv.Encoder(csvOptions)
+encoder.pipe(process.stdout)
 
 const getDuration = x =>
   cp.exec(`soxi -D "${x}"`, {encoding: 'utf8'})
@@ -46,7 +47,6 @@ const pathTransformer = p => new Transform({
   }
 })
 
-encoder.pipe(process.stdout)
 
 const parseCsv = csvPath =>
   fs.createReadStream(`${DIR}${csvPath}`)
@@ -68,7 +68,7 @@ processValidatedCSVFromFolder(DIR)
 const aggregateByDate = groupBy(x => d.format(d.parse(Date.parse(x.now)), 'DD MMMM YY'))
 const summary = mapObjIndexed(applySpec({
   total: length,
-  duration: compose(sum, pluck('duration'))
+  duration: compose(divide(__, 60*60), sum, pluck('duration'))
 }))
 
 const stats = compose(

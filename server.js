@@ -1,5 +1,7 @@
 // #!/usr/bin/env node
 
+for (let k in require('ramda'))
+  global[k] = require('ramda')[k]
 const fs = require('fs')
 const path = require('path')
 const {EOL} = require("os")
@@ -19,13 +21,14 @@ const iconv = require('iconv-lite')
 const querystring = require("querystring")
 const csv = require('oh-csv')
 const encoder = new csv.Encoder({
-  fields: ['text', 'validated', 'quality', 'now']
+  fields: ['text', 'validated', 'quality', 'now', 'duration']
 })
+const cp = mapObjIndexed(require('util').promisify, require('child_process'))
 
-encoder.write(['1','lfdf','три', 'asdasd'])
-
-for (let k in require('ramda'))
-  global[k] = require('ramda')[k]
+const getDuration = x =>
+  cp.exec(`soxi -D "${x}"`, {encoding: 'utf8'})
+    .then(({stdout, stderr}) => parseFloat(stdout))
+    .catch(() => null)
 
 const audioRegexp = /(wav|mp3)$/
 
@@ -87,20 +90,31 @@ const start = (dataFolder, staticPath = 'static') => {
           .replace('recorder', 'recorded'+path.sep)
           .replace(audioRegexp, `${(new Date).getTime()}.$1`)
 
-        const now = (new Date()).toGMTString()
-        const original = audio.replace('data', dataFolder)
 
-        mkdirp(path.dirname(validated), () =>
+
+        const now = (new Date()).toGMTString()
+        const original = audio.replace('data/', dataFolder)
+
+        mkdirp(path.dirname(validated), e => {
+          if (e) return console.error(e)
+
           fs.copyFile(original, validated, e => {
             if (e) return console.error(e)
             fs.unlink(original, identity)
             fs.unlink(textFile.replace('data', dataFolder), identity)
+
+            getDuration(validated).then(duration =>
+              encoder.write({
+                text,
+                validated: validated.replace(validatedFolder+path.sep,''),
+                quality,
+                now,
+                duration,
+              }))
           })
-        )
+        })
 
-        validated = validated.replace(validatedFolder+path.sep,'')
 
-        encoder.write({text, validated, quality, now})
       })
     })
 
