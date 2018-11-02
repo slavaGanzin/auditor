@@ -1,60 +1,64 @@
 #!/usr/bin/env node
+for (let k in require('ramda'))
+  global[k] = require('ramda')[k]
 const fs = require('fs')
-const cp = require('child_process')
 const path = require('path')
 const fsReaddirRecursive = require('fs-readdir-recursive')
 const csv = require('oh-csv')
-const encoder = new csv.Parser({
-  fields: ['text', 'validated', 'quality', 'now']
+const Transform = require('stream').Transform
+const cp = mapObjIndexed(require('util').promisify, require('child_process'))
+
+const csvOptions = {
+  fields: ['text', 'validated', 'quality', 'now', 'duration']
+}
+const DIR = path.resolve(process.argv[2]) + '/'
+
+const parser = new csv.Parser(csvOptions)
+const encoder = new csv.Encoder(csvOptions)
+
+const getDuration = x =>
+  cp.exec(`soxi -D "${x}"`, {encoding: 'utf8'})
+    .then(({stdout, stderr}) => parseFloat(stdout))
+    .catch(() => 0)
+
+const transformer = new Transform({
+  objectMode: true,
+  transform(row, encoding, cb) {
+
+    if (row.duration)
+      return cb(null, row)
+
+    getDuration(DIR+row.validated)
+      .then(duration => {
+        cb(null, merge(row, {duration}))
+      })
+  }
 })
 
-for (let k in require('ramda'))
-  global[k] = require('ramda')[k]
+const pathTransformer = p => new Transform({
+  objectMode: true,
+  transform(row, encoding, cb) {
+    cb(null, merge(row, {validated: path.relative(DIR, p + '/' + row.validated)}))
+  }
+})
 
-let errors =0
-let total = 0
+encoder.pipe(process.stdout)
 
-const parseDuration = compose(
-  parseFloat,
-  replace(/"/g,''),
-  pathOr("0", ['streams_stream_0_duration']),
-  fromPairs,
-  map(split('=')),
-  split('\n')
-)
+const parseCsv = csvPath =>
+  fs.createReadStream(`${DIR}${csvPath}`)
+    .pipe(parser)
+    .pipe(pathTransformer(path.dirname(`${DIR}${csvPath}`) + '/'))
+    .pipe(transformer)
+    .pipe(encoder)
+    .pipe(fs.createWriteStream(`${DIR}total.csv`))
 
-const getDuration = x => new Promise((resolve, reject) =>
-  cp.exec(`ffprobe -v error -of flat=s=_ -select_streams a:0 -show_streams "${x}"`, {encoding: 'utf8'}, (e, stdout, stderr) => {
-    total++
-    // console.log(e)
-    if (!e) return resolve(parseDuration(stdout))
-    errors++
-    resolve(0)
-  }))
-
-const getDurationsOfOneFile = ([d, csv]) => pipe(
-  split('\n'),
-  filter(test(new RegExp(process.argv[3]))),
-  map(replace(/,[^,]+validated([^,]+)/, `,/$1`)),
-  map(replace(/.*,([^,]*mp3).*/g, `${d}/$1`)),
-  map(replace(/\r/g, ``)),
-  map(replace(/\/\//g, `/`)),
-  tap(x => console.log(`total: ${length(x)}`)),
-  map(getDuration),
-)(csv)
-
-const validatedCSVFromFolder = pipe(
+const processValidatedCSVFromFolder = pipe(
   fsReaddirRecursive,
   filter(test(/\.csv$/)),
-  map(x => [
-    path.dirname(`${process.argv[2]}/${x}`),
-    fs.readFileSync(`${process.argv[2]}/${x}`, 'utf8')
-  ])
+  reject(test(/total/)),
+  map(parseCsv)
 )
 
-Promise.all(flatten(map(getDurationsOfOneFile, validatedCSVFromFolder(process.argv[2]))))
-  .then(flatten)
-  .then(reject(x => x > 60))
-  .then(sum)
-  .then(divide(__, 60*60))
-  .then(x => console.log(x + "\nerrors:\t", errors, "\ntotal:\t", total))
+processValidatedCSVFromFolder(DIR)
+
+transformer.on('end', () => console.log(1))
