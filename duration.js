@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+require('events').EventEmitter.defaultMaxListeners = 100
+
 for (let k in require('ramda'))
   global[k] = require('ramda')[k]
 const fs = require('fs')
@@ -63,8 +65,6 @@ const processValidatedCSVFromFolder = pipe(
   map(parseCsv)
 )
 
-processValidatedCSVFromFolder(DIR)
-
 const aggregateByDate = groupBy(x => d.format(d.parse(Date.parse(x.now)), 'DD MMMM YY'))
 const summary = mapObjIndexed(applySpec({
   total: length,
@@ -79,3 +79,5 @@ const stats = compose(
 )
 
 transformer.on('end', () => stats(total))
+
+processValidatedCSVFromFolder(DIR)

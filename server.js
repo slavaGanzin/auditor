@@ -85,12 +85,10 @@ const start = (dataFolder, staticPath = 'static') => {
 
       ws.on('grade', ({text, quality, audio, textFile}) => {
         audio = querystring.unescape(audio)
-        let validated = audio
+        const validated = audio
           .replace('data', validatedFolder)
           .replace('recorder', 'recorded'+path.sep)
           .replace(audioRegexp, `${(new Date).getTime()}.$1`)
-
-
 
         const now = (new Date()).toGMTString()
         const original = audio.replace('data/', dataFolder)
@@ -113,8 +111,6 @@ const start = (dataFolder, staticPath = 'static') => {
               }))
           })
         })
-
-
       })
     })
 
