@@ -18,9 +18,11 @@ const chardet = require('chardet')
 const iconv = require('iconv-lite')
 const querystring = require("querystring")
 const csv = require('oh-csv')
-const encoder = csv.wrapForExcel(new csv.Encoder({
+const encoder = new csv.Encoder({
   fields: ['text', 'validated', 'quality', 'now']
-}))
+})
+
+encoder.write(['1','lfdf','три', 'asdasd'])
 
 for (let k in require('ramda'))
   global[k] = require('ramda')[k]
@@ -84,17 +86,19 @@ const start = (dataFolder, staticPath = 'static') => {
           .replace('data', validatedFolder)
           .replace('recorder', 'recorded'+path.sep)
           .replace(audioRegexp, `${(new Date).getTime()}.$1`)
-        const original = audio.replace('data', dataFolder)
-        mkdirp(path.dirname(validated))
-        fs.copyFile(original, validated, e => {
-          if (e) return console.error(e)
-          fs.unlink(original, identity)
-          fs.unlink(textFile.replace('data', dataFolder), identity)
-        })
 
-        text = text.replace(/"/g, "'").replace(/\n/g, '\\n')
-        validated = validated.replace(validatedFolder+path.sep,'')
         const now = (new Date()).toGMTString()
+        const original = audio.replace('data', dataFolder)
+
+        mkdirp(path.dirname(validated), () =>
+          fs.copyFile(original, validated, e => {
+            if (e) return console.error(e)
+            fs.unlink(original, identity)
+            fs.unlink(textFile.replace('data', dataFolder), identity)
+          })
+        )
+
+        validated = validated.replace(validatedFolder+path.sep,'')
 
         encoder.write({text, validated, quality, now})
       })
