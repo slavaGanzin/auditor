@@ -27,7 +27,7 @@ const cp = mapObjIndexed(require('util').promisify, require('child_process'))
 
 const getDuration = x =>
   cp.exec(`soxi -D "${x}"`, {encoding: 'utf8'})
-    .then(({stdout, stderr}) => parseFloat(stdout))
+    .then(({stdout, stderr}) => parseFloat(stdout.trim()))
     .catch(() => null)
 
 const audioRegexp = /(wav|mp3)$/
@@ -79,38 +79,46 @@ const start = (dataFolder, staticPath = 'static') => {
   const io = socketIo(server)
   io
     .on('connection', ws => {
+      const showError = juxt([console.error, e => ws.emit('show:error', e)])
+
       readFiles(files => ws.emit('files', files))
 
       E.on('update:audio', () => ws.emit('update:audio', {}))
 
       ws.on('grade', ({text, quality, audio, textFile}) => {
-        audio = querystring.unescape(audio)
-        const validated = audio
-          .replace('data', validatedFolder)
-          .replace('recorder', 'recorded'+path.sep)
-          .replace(audioRegexp, `${(new Date).getTime()}.$1`)
+        try {
+          audio = querystring.unescape(audio)
+          const validated = audio
+            .replace('data', validatedFolder)
+            .replace('recorder', 'recorded'+path.sep)
+            .replace(audioRegexp, `${(new Date).getTime()}.$1`)
 
-        const now = (new Date()).toGMTString()
-        const original = audio.replace('data/', dataFolder+'/')
+          const now = (new Date()).toGMTString()
+          const original = audio.replace('data/', dataFolder+'/')
 
-        mkdirp(path.dirname(validated), e => {
-          if (e) return console.error(e)
+          mkdirp(path.dirname(validated), e => {
+            if (e) return showError(e)
 
-          fs.copyFile(original, validated, e => {
-            if (e) return console.error(e)
-            fs.unlink(original, identity)
-            fs.unlink(textFile.replace('data', dataFolder), identity)
+            fs.copyFile(original, validated, e => {
+              if (e) return showError(e)
+              fs.unlink(original, identity)
+              fs.unlink(textFile.replace('data', dataFolder), identity)
 
-            getDuration(validated).then(duration =>
-              encoder.write({
-                text,
-                validated: validated.replace(validatedFolder+path.sep,''),
-                quality,
-                now,
-                duration,
-              }))
+              getDuration(validated)
+                .catch(showError)
+                .then(duration =>
+                  encoder.write({
+                    text,
+                    validated: validated.replace(validatedFolder+path.sep,''),
+                    quality,
+                    now,
+                    duration,
+                  }))
+            })
           })
-        })
+        } catch(e) {
+          showError(e)
+        }
       })
     })
 

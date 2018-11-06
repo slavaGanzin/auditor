@@ -58,6 +58,8 @@ ws.on('update:audio', () =>
   I('audio').src = 'data/recorder.mp3?' + Math.random()
 )
 
+ws.on('show:error', x => alert(`Зовите Славу: ${JSON.stringify(x, null, 2)}`))
+
 Mousetrap
   .bind('tab', e => {
     e.preventDefault()
