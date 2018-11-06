@@ -10,9 +10,11 @@ const csv = require('oh-csv')
 const d = require('date-fns')
 const Transform = require('stream').Transform
 const cp = mapObjIndexed(require('util').promisify, require('child_process'))
+const mergeStream = require('merge-stream')
 
 const csvOptions = {
-  fields: ['text', 'validated', 'quality', 'now', 'duration']
+  fields: ['text', 'validated', 'quality', 'now', 'duration'],
+  quote: '"',
 }
 const DIR = path.resolve(process.argv[2]) + '/'
 
@@ -31,14 +33,12 @@ const addToTotal = tap(total.push.bind(total))
 const transformer = new Transform({
   objectMode: true,
   transform(row, encoding, cb) {
-
     if (row.duration)
       return cb(null, addToTotal(row))
 
-    getDuration(DIR+row.validated)
-      .then(duration => {
-        cb(null, addToTotal(merge(row, {duration})))
-      })
+    getDuration(DIR+row.validated).then(duration =>
+      cb(null, addToTotal(merge(row, {duration})))
+    )
   }
 })
 
@@ -49,20 +49,20 @@ const pathTransformer = p => new Transform({
   }
 })
 
-
 const parseCsv = csvPath =>
   fs.createReadStream(`${DIR}${csvPath}`)
-    .pipe(parser)
-    .pipe(pathTransformer(path.dirname(`${DIR}${csvPath}`) + '/'))
-    .pipe(transformer)
-    .pipe(encoder)
-    .pipe(fs.createWriteStream(`${DIR}total.csv`))
 
 const processValidatedCSVFromFolder = pipe(
   fsReaddirRecursive,
   filter(test(/\.csv$/)),
   reject(test(/total/)),
-  map(parseCsv)
+  map(parseCsv),
+  streams => mergeStream(...streams)
+    .pipe(parser)
+    .pipe(pathTransformer(path.dirname(`${DIR}${csvPath}`) + '/'))
+    .pipe(transformer)
+    .pipe(encoder)
+    .pipe(fs.createWriteStream(`${DIR}total.csv`))
 )
 
 const aggregateByDate = groupBy(x => d.format(d.parse(Date.parse(x.now)), 'DD MMMM YY'))

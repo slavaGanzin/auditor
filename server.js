@@ -4,7 +4,6 @@ for (let k in require('ramda'))
   global[k] = require('ramda')[k]
 const fs = require('fs')
 const path = require('path')
-const {EOL} = require("os")
 const {EventEmitter} = require('events')
 const E = new EventEmitter()
 const express = require('express')
@@ -21,7 +20,8 @@ const iconv = require('iconv-lite')
 const querystring = require("querystring")
 const csv = require('oh-csv')
 const encoder = new csv.Encoder({
-  fields: ['text', 'validated', 'quality', 'now', 'duration']
+  fields: ['text', 'validated', 'quality', 'now', 'duration'],
+  quote: '"',
 })
 const cp = mapObjIndexed(require('util').promisify, require('child_process'))
 
