@@ -91,7 +91,7 @@ const start = (dataFolder, staticPath = 'static') => {
           .replace(audioRegexp, `${(new Date).getTime()}.$1`)
 
         const now = (new Date()).toGMTString()
-        const original = audio.replace('data/', dataFolder)
+        const original = audio.replace('data/', dataFolder+'/')
 
         mkdirp(path.dirname(validated), e => {
           if (e) return console.error(e)
