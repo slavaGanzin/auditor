@@ -10,7 +10,6 @@ const csv = require('oh-csv')
 const d = require('date-fns')
 const Transform = require('stream').Transform
 const cp = mapObjIndexed(require('util').promisify, require('child_process'))
-const mergeStream = require('merge-stream')
 
 const csvOptions = {
   fields: ['text', 'validated', 'quality', 'now', 'duration'],
@@ -18,14 +17,13 @@ const csvOptions = {
 }
 const DIR = path.resolve(process.argv[2]) + '/'
 
-const parser = new csv.Parser(csvOptions)
-const encoder = new csv.Encoder(csvOptions)
-encoder.pipe(process.stdout)
-
 const getDuration = x =>
   cp.exec(`soxi -D "${x}"`, {encoding: 'utf8'})
-    .then(({stdout, stderr}) => parseFloat(stdout))
-    .catch(() => 0)
+    .then(({stdout, stderr}) => parseFloat(stdout) || 0)
+    .catch(x => {
+      console.error(x)
+      return 0
+    })
 
 let total = []
 const addToTotal = tap(total.push.bind(total))
@@ -33,8 +31,8 @@ const addToTotal = tap(total.push.bind(total))
 const transformer = new Transform({
   objectMode: true,
   transform(row, encoding, cb) {
-    if (row.duration)
-      return cb(null, addToTotal(row))
+    // if (row.duration!='null')
+    //   return cb(null, addToTotal(row))
 
     getDuration(DIR+row.validated).then(duration =>
       cb(null, addToTotal(merge(row, {duration})))
@@ -45,37 +43,65 @@ const transformer = new Transform({
 const pathTransformer = p => new Transform({
   objectMode: true,
   transform(row, encoding, cb) {
-    cb(null, merge(row, {validated: path.relative(DIR, p + '/' + row.validated)}))
+    const validated = path.relative(
+      DIR,
+      p + '/' + row.validated
+    )
+
+    fs.copyFile(DIR+validated, DIR+validated.replace(/\d{13}\./, ''), () =>
+      fs.unlink(DIR+validated, () =>
+        cb(null, merge(row, {validated: validated.replace(/\d{13}\./, '')}))
+      )
+    )
   }
 })
 
 const parseCsv = csvPath =>
   fs.createReadStream(`${DIR}${csvPath}`)
+    .pipe(new csv.Parser(csvOptions))
+    .pipe(pathTransformer(path.dirname(`${DIR}${csvPath}`) + '/'))
+    .pipe(transformer)
+    .pipe(new csv.Encoder(csvOptions))
+    .pipe(fs.createWriteStream(`${DIR}total.csv`))
 
 const processValidatedCSVFromFolder = pipe(
   fsReaddirRecursive,
   filter(test(/\.csv$/)),
   reject(test(/total/)),
-  map(parseCsv),
-  streams => mergeStream(...streams)
-    .pipe(parser)
-    .pipe(pathTransformer(path.dirname(`${DIR}${csvPath}`) + '/'))
-    .pipe(transformer)
-    .pipe(encoder)
-    .pipe(fs.createWriteStream(`${DIR}total.csv`))
+  map(parseCsv)
 )
 
-const aggregateByDate = groupBy(x => d.format(d.parse(Date.parse(x.now)), 'DD MMMM YY'))
-const summary = mapObjIndexed(applySpec({
-  total: length,
-  duration: compose(divide(__, 60*60), sum, pluck('duration'))
-}))
+const getDay = x => d.format(d.parse(Date.parse(x.now)), 'DD MMMM YY')
+const aggregateByDate = groupBy(getDay)
+
+const spec = applySpec({
+  "файлов": length,
+  "обработано в часах": compose(x => x.toFixed(2), divide(__, 60*60), sum, pluck('duration')),
+  "дата": compose(getDay, head),
+  "рабочее время": compose(
+    converge((x,y)=> ((y-x)/60/60/1000).toFixed(2), [head, last]),
+    map(Date.parse),
+    pluck('now')
+  )
+})
+
+const summary = mapObjIndexed(spec)
+
+const average = converge(divide, [sum, length])
 
 const stats = compose(
-  console.log,
-  x => JSON.stringify(x, null, ' '),
+  x => console.log('||'+join('||', x)+'||'),
+  map(sum),
+  tap(x => x[x.length-1] = [average(x[x.length-1]).toFixed(2)]),
+  transpose,
+  map(values),
+  tap(map(x => console.log('|'+join('|', values(x))+'|'))),
+  tap(x => console.log('||'+join('||', keys(head(x)))+'||')),
+  map(tap(x => x['эффективность'] = parseFloat((x["обработано в часах"]/x["рабочее время"]).toFixed(2)))),
+  values,
   summary,
-  aggregateByDate
+  aggregateByDate,
+  reject(x => x['duration'] > 20)
 )
 
 transformer.on('end', () => stats(total))

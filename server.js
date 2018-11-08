@@ -91,7 +91,7 @@ const start = (dataFolder, staticPath = 'static') => {
           const validated = audio
             .replace('data', validatedFolder)
             .replace('recorder', 'recorded'+path.sep)
-            .replace(audioRegexp, `${(new Date).getTime()}.$1`)
+            // .replace(audioRegexp, `${(new Date).getTime()}.$1`)
 
           const now = (new Date()).toISOString()
           const original = audio.replace('data/', dataFolder+'/')
@@ -99,22 +99,24 @@ const start = (dataFolder, staticPath = 'static') => {
           mkdirp(path.dirname(validated), e => {
             if (e) return showError(e)
 
-            fs.copyFile(original, validated, e => {
-              if (e) return showError(e)
-              fs.unlink(original, identity)
-              fs.unlink(textFile.replace('data', dataFolder), identity)
+            fs.copyFile(original, validated, copyError =>
+              fs.stat(validated, statError => {
+                if (statError) return showError(copyError)
 
-              getDuration(validated)
-                .catch(showError)
-                .then(duration =>
-                  encoder.write({
-                    text,
-                    validated: validated.replace(validatedFolder+path.sep,''),
-                    quality,
-                    now,
-                    duration,
-                  }))
-            })
+                fs.unlink(original, identity)
+                fs.unlink(textFile.replace('data', dataFolder), identity)
+
+                getDuration(validated)
+                  .catch(showError)
+                  .then(duration =>
+                    encoder.write({
+                      text,
+                      validated: validated.replace(validatedFolder+path.sep,''),
+                      quality,
+                      now,
+                      duration,
+                    }))
+              }))
           })
         } catch(e) {
           showError(e)
