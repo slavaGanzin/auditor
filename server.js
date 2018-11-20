@@ -42,7 +42,7 @@ const start = (dataFolder, staticPath = 'static') => {
 
   const outWav = `${dataFolder}/recorder.wav`
 
-  mkdirp(validatedFolder)
+  mkdirp.sync(validatedFolder)
 
   const validateCsvPath = path.resolve(validatedFolder, 'validated.csv')
   console.log(`validated: ${validateCsvPath}`)
@@ -124,23 +124,23 @@ const start = (dataFolder, staticPath = 'static') => {
       })
     })
 
-  const binaryServer = binaryjs.BinaryServer({port: 9002})
-  binaryServer.on('connection', (client) => {
-    client.on('stream', (stream, meta) => {
-      const fileWriter = new wav.FileWriter(outWav, {
-        channels: 1,
-        sampleRate: 48000,
-        bitDepth: 16
-      })
-      stream.pipe(fileWriter)
-
-      stream.on('end', () => {
-        fileWriter.end()
-        E.emit('update:audio', {})
-      })
-    })
-  })
-
+  // const binaryServer = binaryjs.BinaryServer({port: 9002})
+  // binaryServer.on('connection', (client) => {
+  //   client.on('stream', (stream, meta) => {
+  //     const fileWriter = new wav.FileWriter(outWav, {
+  //       channels: 1,
+  //       sampleRate: 48000,
+  //       bitDepth: 16
+  //     })
+  //     stream.pipe(fileWriter)
+  //
+  //     stream.on('end', () => {
+  //       fileWriter.end()
+  //       E.emit('update:audio', {})
+  //     })
+  //   })
+  // })
+  //
   server.listen(65533)
 }
 

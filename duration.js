@@ -49,12 +49,12 @@ const pathTransformer = p => new Transform({
       p + '/' + row.validated.replace(/.*\\validated/gim, '')
     )
 
-    cb(null, merge(row, {validated}))
-    // fs.copyFile(DIR+validated, DIR+validated.replace(/\d{13}\./, ''), () =>
-    //   fs.unlink(DIR+validated, () =>
-    //     cb(null, merge(row, {validated: validated.replace(/\d{13}\./, '')}))
-    //   )
-    // )
+    // cb(null, merge(row, {validated}))
+    fs.copyFile(DIR+validated, DIR+validated.replace(/\d{13}\./, ''), () =>
+      fs.unlink(DIR+validated, () =>
+        cb(null, merge(row, {validated: validated.replace(/\d{13}\./, '')}))
+      )
+    )
   }
 })
 

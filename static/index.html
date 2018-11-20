@@ -262,14 +262,24 @@ function blurAll(){
 </script>
 <script>const ws = io.connect('http://127.0.0.1:65533')
 
+const setMono = () => {
+  const context = new AudioContext()
+  const audioSource = context.createMediaElementSource(I('audio'))
+  const merger = new ChannelMergerNode(context, {})
+  audioSource.connect(merger)
+  merger.connect(context.destination)
+}
+
 let fileIndex = 0
 
 const redrawCard = () => {
+
   T.card(FILES[fileIndex])
   Mousetrap(I('text')).bind('escape', e => {
     blurAll()
   })
   Mousetrap(I("audio")).bind('space', e => e.stopPropagation())
+  setMono()
 
   // I('grade').style.opacity = 0
   // I('audio').addEventListener('progress',
@@ -303,16 +313,16 @@ const grade = quality => {
 const rewind = sec =>
   I('audio').currentTime = clamp(0, I('audio').duration, I('audio').currentTime + sec)
 
-const record = () => {
-  if(window.recording) {
-    $('#record .button')[0].classList.remove('recording')
-    return window.stopRecording()
-  }
-
-  ws.emit('record:start', getFileParams())
-  $('#record .button')[0] .classList.add('recording')
-  window.startRecording()
-}
+// const record = () => {
+//   if(window.recording) {
+//     $('#record .button')[0].classList.remove('recording')
+//     return window.stopRecording()
+//   }
+//
+//   ws.emit('record:start', getFileParams())
+//   $('#record .button')[0] .classList.add('recording')
+//   window.startRecording()
+// }
 
 ws.on('files', compose(redrawCard, files => window.FILES = files))
 
