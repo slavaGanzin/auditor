@@ -44,17 +44,25 @@ const transformer = () => new Transform({
 const pathTransformer = p => new Transform({
   objectMode: true,
   transform(row, encoding, cb) {
+    if (!row.validated) return cb(null)
+
     const validated = path.relative(
       DIR,
       p + '/' + row.validated.replace(/.*\\validated/gim, '')
     )
 
-    // cb(null, merge(row, {validated}))
-    fs.copyFile(DIR+validated, DIR+validated.replace(/\d{13}\./, ''), () =>
-      fs.unlink(DIR+validated, () =>
-        cb(null, merge(row, {validated: validated.replace(/\d{13}\./, '')}))
+
+    const noRandomPartValidated = validated.replace(/\d{13}\./, '')
+
+    if (noRandomPartValidated == validated)
+      cb(null, merge(row, {validated}))
+    else
+      fs.copyFile(DIR+validated, DIR+noRandomPartValidated, () =>
+        fs.unlink(DIR+validated, () =>
+          cb(null, merge(row, {validated: noRandomPartValidated}))
+        )
       )
-    )
+
   }
 })
 
@@ -86,6 +94,8 @@ const stats = compose(
   tap(map(x => console.log('|'+join('|', values(x))+'|'))),
   tap(x => console.log('||'+join('||', keys(head(x)))+'||')),
   map(tap(x => x['эффективность'] = parseFloat((x["обработано в часах"]/(x["рабочее время"]+EPSILON)).toFixed(2)))),
+  reject(x => x['дата'] == 'Invalid Date'),
+  reject(x => parseInt(x['обработано в часах']) == 0),
   values,
   summary,
   aggregateByDate,
