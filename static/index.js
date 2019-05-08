@@ -10,19 +10,24 @@ const setMono = () => {
 
 let fileIndex = 0
 
+const volume = (a=.05) => e => {
+  e.preventDefault()
+  I('audio').muted = false
+  I('audio').volume = clamp(0, 1, I('audio').volume + a)
+}
+
 const redrawCard = () => {
 
   T.card(FILES[fileIndex])
-  Mousetrap(I('text')).bind('escape', e => {
-    blurAll()
-  })
-  Mousetrap(I("audio")).bind('space', e => e.stopPropagation())
-  setMono()
+  Mousetrap(I('text'))
+    .bind('escape', e => { blurAll() })
+    .bind('ctrl+-', volume(-.05))
+    .bind('ctrl+=', volume(+.05))
+    .bind('ctrl++', volume(+.05))
+  Mousetrap(I("audio"))
+    .bind('space', e => e.stopPropagation())
 
-  // I('grade').style.opacity = 0
-  // I('audio').addEventListener('progress',
-  //   x => I('grade').style.opacity = 1
-  // )
+  // setMono()
 }
 
 const updateText = () => {
@@ -87,4 +92,9 @@ Mousetrap
   .bind('3', () => grade(3))
   .bind('4', () => grade(4))
   .bind('5', () => grade(5))
+  .bind('ctrl+-', volume(-.05))
+  .bind('ctrl+=', volume(+.05))
+  .bind('ctrl++', volume(+.05))
+
+
   // .bind(['r', 'к'], record)

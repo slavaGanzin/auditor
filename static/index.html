@@ -153,7 +153,7 @@ arguments)}}(b))};e.init();p.Mousetrap=e;"undefined"!==typeof module&&module.exp
 </style>
 <div id="templates">
   <div class="card fadeIn">
-    <div id="text" contenteditable="true" onfocus="I('audio').pause()" onblur="I('audio').play()" onkeyup="updateText()">{0}</div>
+    <div id="text" contenteditable="true" onfocus="I('audio').pause()" onblur="I('audio').play()" onkeyup="updateText(event)">{0}</div>
     <audio id="audio" controls="controls" autoplay="autoplay" loop="loop" src="{1}"></audio><span style="font-size: 10px; color: grey">{1}</span>
   </div>
 </div>
@@ -272,19 +272,24 @@ const setMono = () => {
 
 let fileIndex = 0
 
+const volume = (a=.05) => e => {
+  e.preventDefault()
+  I('audio').muted = false
+  I('audio').volume = clamp(0, 1, I('audio').volume + a)
+}
+
 const redrawCard = () => {
 
   T.card(FILES[fileIndex])
-  Mousetrap(I('text')).bind('escape', e => {
-    blurAll()
-  })
-  Mousetrap(I("audio")).bind('space', e => e.stopPropagation())
-  setMono()
+  Mousetrap(I('text'))
+    .bind('escape', e => { blurAll() })
+    .bind('ctrl+-', volume(-.05))
+    .bind('ctrl+=', volume(+.05))
+    .bind('ctrl++', volume(+.05))
+  Mousetrap(I("audio"))
+    .bind('space', e => e.stopPropagation())
 
-  // I('grade').style.opacity = 0
-  // I('audio').addEventListener('progress',
-  //   x => I('grade').style.opacity = 1
-  // )
+  // setMono()
 }
 
 const updateText = () => {
@@ -349,6 +354,11 @@ Mousetrap
   .bind('3', () => grade(3))
   .bind('4', () => grade(4))
   .bind('5', () => grade(5))
+  .bind('ctrl+-', volume(-.05))
+  .bind('ctrl+=', volume(+.05))
+  .bind('ctrl++', volume(+.05))
+
+
   // .bind(['r', 'к'], record)
 
 </script>

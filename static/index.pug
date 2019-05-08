@@ -11,7 +11,7 @@ style
     
 #templates
   .card.fadeIn
-    #text(contenteditable='true' onfocus="I('audio').pause()" onblur="I('audio').play()" onkeyup='updateText()') {0}
+    #text(contenteditable='true' onfocus="I('audio').pause()" onblur="I('audio').play()" onkeyup='updateText(event)') {0}
     audio#audio(controls autoplay loop src="{1}")
     span(style='font-size: 10px; color: grey') {1}
     //- #record
