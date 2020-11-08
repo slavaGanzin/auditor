@@ -1,7 +1,4 @@
-# Audio validator
-
-
-Audio transcriber/validator for STT
+# Audio transcriber/validator for STT
 
 ![](demo.gif)
 
