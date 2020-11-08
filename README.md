@@ -1,26 +1,22 @@
-#Audio validator
+# Audio validator
 
 
 Audio transcriber/validator for STT
 
 ![](demo.gif)
 
-##Run in current directory:
+## Run in current directory:
 ```
 git clone git@github.com:slavaGanzin/auditor.git
 cd auditor
 npm start
 ```
 
-Folder *data* will be transcibed by default.
+Folder *"data"* will be transcibed by default.
 You can change folder:
   - specify in cli `./server path/to/data/folder`
   - change package.json *run* section
   - [use electron app](##build-cross-platform-electron-app)
-
-
-## Processing
-Enter transcription **and grade audio quality** to go to next file
 
 
 ## Shortcuts
@@ -41,13 +37,13 @@ Enter transcription **and grade audio quality** to go to next file
 
 ## Expected input
 
-- *data* folder can contain any subfolder structure
+- *"data"* folder can contain any subfolder structure
 - audio (wav|mp3|opus|ogg) file has paired .txt file with transcription
 
 
 ## Processing life-cycle
 
-*validated* folder will be created at the same level as your data folder:
+*"validated"* folder will be created at the same level as your data folder:
 ```
 data/
   non processed audio files
@@ -56,7 +52,7 @@ validated/
   validated.csv
 
 ```
-Processed files will be **moved** to *validated* folder.
+Processed files will be **moved** to *"validated"* folder.
 
 validated.csv fields:
 - transcribed text,audio quality score
@@ -72,7 +68,7 @@ This course...,sample.wav,5,2020-11-08T08:27:14.868Z,6.257778
 
 ```
 
-##Build cross-platform electron app
+## Build cross-platform electron app
 *and you will get nifty folder selection for free*
 
 ```
