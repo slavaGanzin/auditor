@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prestart": "touch node_modules || npm install",
+    "prestart": "ls node_modules > /dev/null || npm install",
     "start": "concurrently 'node_modules/.bin/stylus --watch --out static static/index.styl' 'node_modules/.bin/pug --watch static --name-after-file --pretty --no-debug' 'node ./server data' 'node_modules/.bin/open-cli http://127.0.0.1:8000'",
     "prebuild": "npm install",
     "build": "sh -c 'node_modules/.bin/stylus --out static static/index.styl; node_modules/.bin/pug static --name-after-file --pretty --no-debug; rm -rf build; mkdir build; cd build; ../node_modules/.bin/electron-packager  .. auditor --overwrite --platform linux,win32,darwin --arch x64 --prune=true --version-string.CompanyName=Wartech --version-string.FileDescription=Wartech --version-string.ProductName=Auditor; for i in *; do zip -r $i.zip $i; done'"

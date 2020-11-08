@@ -3,6 +3,8 @@
 
 Run in current directory:
 ```
+git clone git@github.com:slavaGanzin/auditor.git
+cd auditor
 npm start
 ```
 
