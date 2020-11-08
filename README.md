@@ -3,6 +3,7 @@
 
 Audio transcriber/validator for STT
 
+![](demo.gif)
 
 ##Run in current directory:
 ```
@@ -23,7 +24,7 @@ Enter transcription **and grade audio quality** to go to next file
 
 
 ## Shortcuts
-|||
+|key|action|
 |---|---|
 `ctrl +`/`ctrl =` | volume up
 `ctrl -` | volume down
