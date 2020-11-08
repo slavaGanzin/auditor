@@ -66,7 +66,6 @@ const rewind = sec =>
 //   $('#record .button')[0] .classList.add('recording')
 //   window.startRecording()
 // }
-
 ws.on('files', compose(redrawCard, files => window.FILES = files))
 
 ws.on('update:audio', () =>
