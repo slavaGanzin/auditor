@@ -1,18 +1,30 @@
 #Audio validator
 
 
-Run in current directory:
+Audio transcriber/validator for STT
+
+
+##Run in current directory:
 ```
 git clone git@github.com:slavaGanzin/auditor.git
 cd auditor
 npm start
 ```
 
-Folder "data" will be transcibed by default.
-You can choose folder yourself (or change package.json *run* section):
-```
-./server path/to/data/folder
-```
+Folder *data* will be transcibed by default.
+You can change folder:
+  - specify in cli `./server path/to/data/folder`
+  - change package.json *run* section
+  - [use electron app](##build-cross-platform-electron-app)
+
+
+## Expected input
+
+- *data* folder can contain any subfolder structure
+- audio (wav|mp3|opus|ogg) file has paired .txt file with transcription
+
+
+## Processing life-cycle
 
 *validated* folder will be created at the same level as your data folder:
 ```
@@ -39,8 +51,19 @@ This course...,sample.wav,5,2020-11-08T08:27:14.868Z,6.257778
 
 ```
 
-Build cross-platform electron app and you will get nifty folder selection for free:
+##Build cross-platform electron app
+*and you will get nifty folder selection for free*
 
 ```
 npm run build
+
+# Executables are:
+# linux
+build/auditor-linux-x64/auditor
+
+# Mac Os
+build/auditor-darwin-x64/auditor
+
+# Windows
+build/auditor-win32-x64/auditor
 ```
