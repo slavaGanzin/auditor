@@ -18,6 +18,26 @@ You can change folder:
   - [use electron app](##build-cross-platform-electron-app)
 
 
+## Processing
+Enter transcription **and grade audio quality** to go to next file
+
+
+## Shortcuts
+|||
+|---|---|
+`ctrl +`/`ctrl =` | volume up
+`ctrl -` | volume down
+`left` | rewind 1 second
+`right` | forward 1 second
+`ctrl left` | rewind 10 second
+`ctrl right` | forward 10 second
+`down` | skip file
+`up` | return to skipped
+`space` | start/stop
+`escape` | back to listening
+`1 2 3 4 5` | grade audio quality and move to next file
+
+
 ## Expected input
 
 - *data* folder can contain any subfolder structure

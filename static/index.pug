@@ -11,7 +11,7 @@ style
     
 #templates
   .card.fadeIn
-    #text(contenteditable='true' onfocus="I('audio').pause()" onblur="I('audio').play()" onkeyup='updateText(event)') {0}
+    #text(contenteditable='true' onfocus="I('audio').pause()" onblur="I('audio').play()" onkeyup='updateText(event)' placeholder='type transcription') {0}
     audio#audio(controls autoplay loop src="{1}")
     span(style='font-size: 10px; color: grey') {1}
     //- #record
@@ -22,11 +22,11 @@ style
   each n, color in {'red':1, 'orange': 2, 'grey': 3, 'MediumSeaGreen': 4, 'green': 5}
     .button(onclick=`grade(${n})` style=`background-color:${color}`)= n
   
-script
-  include binary.min.js
+//- script
+//-   include binary.min.js
 script
   include global.js
-script
-  include recorder.js
+//- script
+//-   include recorder.js
 script
   include index.js

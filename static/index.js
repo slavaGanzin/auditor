@@ -73,7 +73,7 @@ ws.on('update:audio', () =>
   I('audio').src = 'data/recorder.mp3?' + Math.random()
 )
 
-ws.on('show:error', x => alert(`Зовите Славу: ${JSON.stringify(x, null, 2)}`))
+ws.on('show:error', x => alert(`Reach developer: ${JSON.stringify(x, null, 2)}`))
 
 Mousetrap
   .bind('tab', e => {
@@ -97,4 +97,4 @@ Mousetrap
   .bind('ctrl++', volume(+.05))
 
 
-  // .bind(['r', 'к'], record)
+// .bind(['r', 'к'], record)
