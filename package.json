@@ -5,14 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./server",
-    "dev": "node_modules/.bin/stylus --watch --out static static/index.styl & node_modules/.bin/pug --watch static --name-after-file --pretty --no-debug & node-dev ./server ~/Downloads & wait",
-    "build": "sh -c 'node_modules/.bin/stylus --out static static/index.styl; node_modules/.bin/pug static --name-after-file --pretty --no-debug; rm -rf build; mkdir build; cd build; electron-packager .. auditor --overwrite --platform linux --arch x64 --prune=true --version-string.CompanyName=Wartech --version-string.FileDescription=Wartech --version-string.ProductName=Auditor; for i in *; do zip -r $i.zip $i; done'",
-    "release": "scp build/auditor-linux-x64.zip user@192.168.20.162:~; ssh user@192.168.20.162 'unzip -ou auditor-linux-x64.zip' ;  scp build/auditor-linux-x64.zip user@192.168.20.80:~; ssh user@192.168.20.80 'unzip -ou auditor-linux-x64.zip' ;"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@git.warfare-tec.com:ML/audit.git"
+    "prestart": "touch node_modules || npm install",
+    "start": "concurrently 'node_modules/.bin/stylus --watch --out static static/index.styl' 'node_modules/.bin/pug --watch static --name-after-file --pretty --no-debug' 'node ./server data' 'node_modules/.bin/open-cli http://127.0.0.1:8000'",
+    "prebuild": "npm install",
+    "build": "sh -c 'node_modules/.bin/stylus --out static static/index.styl; node_modules/.bin/pug static --name-after-file --pretty --no-debug; rm -rf build; mkdir build; cd build; ../node_modules/.bin/electron-packager  .. auditor --overwrite --platform linux,win32,darwin --arch x64 --prune=true --version-string.CompanyName=Wartech --version-string.FileDescription=Wartech --version-string.ProductName=Auditor; for i in *; do zip -r $i.zip $i; done'"
   },
   "author": "",
   "license": "ISC",
@@ -38,9 +34,12 @@
     "wav": "^1.0.2"
   },
   "devDependencies": {
+    "concurrently": "^5.3.0",
     "electron": "^2.0.5",
+    "electron-packager": "^15.1.0",
     "pug": "^2.0.3",
     "pug-cli": "^1.0.0-alpha6",
+    "open-cli": "^6.0.1",
     "stylus": "^0.54.5"
   }
 }

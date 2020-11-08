@@ -1,4 +1,4 @@
-// #!/usr/bin/env node
+#!/usr/bin/env node
 
 for (let k in require('ramda'))
   global[k] = require('ramda')[k]
@@ -30,7 +30,7 @@ const getDuration = x =>
     .then(({stdout, stderr}) => parseFloat(stdout.trim()))
     .catch(() => null)
 
-const audioRegexp = /(wav|mp3)$/
+const audioRegexp = /(wav|mp3|opus|ogg)$/
 
 const start = (dataFolder, staticPath = 'static') => {
   const validatedFolder = path.resolve(dataFolder, '..', 'validated')
@@ -141,7 +141,7 @@ const start = (dataFolder, staticPath = 'static') => {
   //   })
   // })
   //
-  server.listen(65533)
+  server.listen(8000)
 }
 
 if (process.argv[2])

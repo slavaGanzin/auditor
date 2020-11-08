@@ -17,7 +17,7 @@ function createWindow () {
   mainWindow = new BrowserWindow({title: 'Wartech Auditor'})
   mainWindow.maximize()
 
-  mainWindow.loadURL('http://127.0.0.1:65533')
+  mainWindow.loadURL('http://127.0.0.1:8000')
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()

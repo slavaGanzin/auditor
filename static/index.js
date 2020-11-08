@@ -1,4 +1,4 @@
-const ws = io.connect('http://127.0.0.1:65533')
+const ws = io.connect('http://127.0.0.1:8000')
 
 const setMono = () => {
   const context = new AudioContext()
